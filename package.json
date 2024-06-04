@@ -6,10 +6,11 @@
     "start": "node ./sockets.js"
   },
   "dependencies": {
+    "@playwright/test": "^1.44.1",
+    "odiff-bin": "^3.0.0",
     "sequelize": "^6.37.3",
     "socket.io-client": "^4.7.5",
-    "sqlite3": "^5.1.7",
-    "@playwright/test": "^1.44.1"
+    "sqlite3": "^5.1.7"
   },
   "devDependencies": {
     "@types/node": "^20.13.0"

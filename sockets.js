@@ -5,6 +5,9 @@ const playwright = require('playwright');
 
 // init OCR
 
+// compare
+const { compare } = require("odiff-bin")
+
 // синхронизация дб после запуска
 db.sequelize.sync({ force: true })
     .then(() => {
@@ -62,6 +65,8 @@ socket.on('run_account', async (payload) => {
     const password = page.locator("#login > div.popup-stretch__content > form > div:nth-child(3) > div > input[type=password]")
     await password.fill(payload.password)
 
+    //add fucntion to repeat button click if bot check is failed
+    //body > div.font2.error_tooltip.left
     const login_button = page.locator('#login > div.popup-stretch__content > form > div:nth-child(4) > button')
     await login_button.click()
 
@@ -91,7 +96,16 @@ socket.on('run_account', async (payload) => {
         await page.waitForTimeout(2000)
     }
     console.log('finished')
-    
+    await page.waitForTimeout(2000)
+    await page.screenshot({ path: 'cross.png', clip: {x: 1244, y: 52, width: 30, height: 28} });
+
+
+    const { match, reason } = await compare(
+        "cross.png",
+        "idealcross.png",
+        "difference.png"
+      );
+    console.log(match, reason)
     /* смотреть насколько загрузилась игра и слать статус в WS  (wait until 100%)
         Подождать вторую загрузку
         emit = game loaded
