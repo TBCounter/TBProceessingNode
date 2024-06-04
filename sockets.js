@@ -80,6 +80,18 @@ socket.on('run_account', async (payload) => {
         return
     }
 
+    const progress_bar = page.locator('#game_frame > div.webgl-content > div.game-loading-screen > div.game-loading-screen__container.zindex-2 > div.game-loading-indicator > div.game-loading-progress-bar > div.game-loading-progress-bar__progress-percents')
+
+    let progressBarValue = '';
+
+    while (progressBarValue !== '100%') {
+        progressBarValue = await progress_bar.innerHTML()
+        socket.emit('progress', progressBarValue)
+        console.log(progressBarValue)
+        await page.waitForTimeout(2000)
+    }
+    console.log('finished')
+    
     /* смотреть насколько загрузилась игра и слать статус в WS  (wait until 100%)
         Подождать вторую загрузку
         emit = game loaded
