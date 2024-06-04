@@ -69,6 +69,14 @@ socket.on('run_account', async (payload) => {
     //body > div.font2.error_tooltip.left
     const login_button = page.locator('#login > div.popup-stretch__content > form > div:nth-child(4) > button')
     await login_button.click()
+    
+    const bot_check_failed = page.locator('body > div.font2.error_tooltip.left')
+    if (bot_check_failed) {
+        const page = await context.newPage();
+        await page.goto('https://www.google.com/search?q=why+exploiting+software+is+unethical&rlz=1C1FHFK_ruKG1099KG1099&oq=why+exploiting+software+is+unethical&gs_lcrp=EgZjaHJvbWUyBggAEEUYOTIHCAEQIRigAdIBCTEwMTk0ajBqN6gCALACAA&sourceid=chrome&ie=UTF-8');
+        await page.close()
+        await login_button.click()
+    }
 
     const gameContainer = page.locator('#gameContainer')
 
@@ -100,11 +108,11 @@ socket.on('run_account', async (payload) => {
     await page.screenshot({ path: 'cross.png', clip: {x: 1244, y: 52, width: 30, height: 28} });
 
 
-    const { match, reason } = await compare(
-        "cross.png",
-        "idealcross.png",
-        "difference.png"
-      );
+    //const { match, reason } = await compare(
+    //    "cross.png",
+    //    "idealcross.png",
+    //    "difference.png"
+    //  );
     console.log(match, reason)
     /* смотреть насколько загрузилась игра и слать статус в WS  (wait until 100%)
         Подождать вторую загрузку
