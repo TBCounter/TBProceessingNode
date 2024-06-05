@@ -135,3 +135,5 @@ dist
 
 
 *.db
+
+screenshots/*.png

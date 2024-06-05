@@ -17,7 +17,7 @@ db.sequelize.sync({ force: true })
         console.log("Failed to sync db: " + err.message);
     });
 
-	
+
 // Адрес сервера
 const socket = io('http://192.168.1.133:3000/node', {
     transports: ['websocket'], // Использование WebSocket транспорта
@@ -68,7 +68,7 @@ socket.on('run_account', async (payload) => {
     //body > div.font2.error_tooltip.left
     const login_button = page.locator('#login > div.popup-stretch__content > form > div:nth-child(4) > button')
     await login_button.click()
-    await page.screenshot({ path: 'checking.png'});
+    await page.screenshot({ path: 'screenshots/checking.png' });
     console.log('checking save)')
 
     const bot_check_failed = page.locator('body > div.font2.error_tooltip.left')
@@ -78,6 +78,10 @@ socket.on('run_account', async (payload) => {
         await page.close()
         await login_button.click()
     }
+
+    await page.screenshot({ path: 'screenshots/checking1.png' });
+    console.log('checking1 save)')
+
 
     const gameContainer = page.locator('#gameContainer')
 

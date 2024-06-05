@@ -5,6 +5,9 @@ services:
     networks:
       - backend
 
+    volumes:
+      - ./screenshots:/app/screenshots
+
   db:
     image: postgres
     restart: always
