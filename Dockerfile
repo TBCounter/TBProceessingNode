@@ -4,15 +4,13 @@
 # If you need more help, visit the Dockerfile reference guide at
 # https://docs.docker.com/engine/reference/builder/
 
-ARG NODE_VERSION=18.17.1
-
-FROM node:${NODE_VERSION}-alpine
+FROM node:20-bookworm
 
 # Use production node environment by default.
 ENV NODE_ENV production
 
 
-WORKDIR /usr/src/app
+WORKDIR /app
 
 # Download dependencies as a separate step to take advantage of Docker's caching.
 # Leverage a cache mount to /root/.yarn to speed up subsequent builds.
@@ -22,7 +20,10 @@ RUN --mount=type=bind,source=package.json,target=package.json \
     --mount=type=bind,source=yarn.lock,target=yarn.lock \
     --mount=type=cache,target=/root/.yarn \
     yarn install --production --frozen-lockfile
+    
+RUN npx -y playwright@1.44.1 install --with-deps chromium
 
+RUN mkdir -p /app/data && chmod -R 775 /app/data 
 # Run the application as a non-root user.
 USER node
 

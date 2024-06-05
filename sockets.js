@@ -17,10 +17,9 @@ db.sequelize.sync({ force: true })
         console.log("Failed to sync db: " + err.message);
     });
 
-
-
+	
 // Адрес сервера
-const socket = io('http://localhost:3000/node', {
+const socket = io('http://192.168.1.133:3000/node', {
     transports: ['websocket'], // Использование WebSocket транспорта
 });
 
@@ -105,14 +104,15 @@ socket.on('run_account', async (payload) => {
     }
     console.log('finished')
     await page.waitForTimeout(2000)
-    await page.screenshot({ path: 'cross.png', clip: {x: 1244, y: 52, width: 30, height: 28} });
+    await page.screenshot({ path: 'cross.png', clip: { x: 1244, y: 52, width: 30, height: 28 } });
 
 
-    //const { match, reason } = await compare(
-    //    "cross.png",
-    //    "idealcross.png",
-    //    "difference.png"
-    //  );
+    const { match, reason } = await compare(
+        "cross.png",
+        "idealcross.png",
+        "difference.png",
+        { threshold: 0.5 }
+    );
     console.log(match, reason)
     /* смотреть насколько загрузилась игра и слать статус в WS  (wait until 100%)
         Подождать вторую загрузку

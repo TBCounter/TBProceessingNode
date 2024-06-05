@@ -6,6 +6,7 @@
     "start": "node ./sockets.js"
   },
   "dependencies": {
+    "@sequelize/postgres": "^7.0.0-alpha.40",
     "@playwright/test": "^1.44.1",
     "odiff-bin": "^3.0.0",
     "sequelize": "^6.37.3",

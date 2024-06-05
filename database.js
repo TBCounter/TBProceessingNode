@@ -1,9 +1,17 @@
 const Sequelize = require("sequelize");
+const path = require('path');
 
+const dbPath = path.resolve(__dirname, 'data', 'database.db');
 
 const sequelize = new Sequelize({
-    dialect: 'sqlite',
-    storage: './database.db'
+    dialect: 'postgres',
+    database: 'tbcounter-node',
+    username: 'admin',
+    password: 'admin',
+    host: 'db',
+    port: 5432,
+    ssl: true,
+    clientMinMessages: 'notice',
 });
 
 
