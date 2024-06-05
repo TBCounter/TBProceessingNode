@@ -50,7 +50,7 @@ socket.on('connect_error', (error) => {
 
 socket.on('run_account', async (payload) => {
     socket.emit('status', 'opening page');
-    const browser = await playwright['chromium'].launch({ headless: false });
+    const browser = await playwright['chromium'].launch({ headless: true });
     const context = await browser.newContext();
     const page = await context.newPage();
     await page.goto(payload.address);
@@ -68,7 +68,9 @@ socket.on('run_account', async (payload) => {
     //body > div.font2.error_tooltip.left
     const login_button = page.locator('#login > div.popup-stretch__content > form > div:nth-child(4) > button')
     await login_button.click()
-    
+    await page.screenshot({ path: 'checking.png'});
+    console.log('checking save)')
+
     const bot_check_failed = page.locator('body > div.font2.error_tooltip.left')
     if (bot_check_failed) {
         const page = await context.newPage();

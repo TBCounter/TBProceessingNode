@@ -20,15 +20,15 @@ RUN --mount=type=bind,source=package.json,target=package.json \
     --mount=type=bind,source=yarn.lock,target=yarn.lock \
     --mount=type=cache,target=/root/.yarn \
     yarn install --production --frozen-lockfile
+
+   
+    # Run the application as a non-root user.
+# USER node
     
 RUN npx -y playwright@1.44.1 install --with-deps chromium
-
-RUN mkdir -p /app/data && chmod -R 775 /app/data 
-# Run the application as a non-root user.
-USER node
-
 # Copy the rest of the source files into the image.
 COPY . .
+
 
 # Run the application.
 CMD yarn start
