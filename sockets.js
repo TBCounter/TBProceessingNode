@@ -2,11 +2,14 @@
 const io = require('socket.io-client');
 const db = require('./database')
 const playwright = require('playwright');
+const fs = require('fs');
+
 
 // init OCR
 
-// compare
-const { compare } = require("odiff-bin")
+// pixelmatch
+const PNG = require('pngjs').PNG;
+const pixelmatch = require('pixelmatch');
 
 // синхронизация дб после запуска
 db.sequelize.sync({ force: true })
@@ -19,7 +22,7 @@ db.sequelize.sync({ force: true })
 
 
 // Адрес сервера
-const socket = io('http://192.168.1.133:3000/node', {
+const socket = io('http://192.168.114.107:3000/node', {
     transports: ['websocket'], // Использование WebSocket транспорта
 });
 
@@ -68,58 +71,51 @@ socket.on('run_account', async (payload) => {
     //body > div.font2.error_tooltip.left
     const login_button = page.locator('#login > div.popup-stretch__content > form > div:nth-child(4) > button')
     await login_button.click()
-    await page.screenshot({ path: 'screenshots/checking.png' });
-    console.log('checking save)')
+    await page.screenshot({ path: 'screenshots/checking1.png' });
+    console.log('checking save 1')
 
-    const bot_check_failed = page.locator('body > div.font2.error_tooltip.left')
+    /*const bot_check_failed = page.locator('body > div.font2.error_tooltip.left')
     if (bot_check_failed) {
         const page = await context.newPage();
         await page.goto('https://www.google.com/search?q=why+exploiting+software+is+unethical&rlz=1C1FHFK_ruKG1099KG1099&oq=why+exploiting+software+is+unethical&gs_lcrp=EgZjaHJvbWUyBggAEEUYOTIHCAEQIRigAdIBCTEwMTk0ajBqN6gCALACAA&sourceid=chrome&ie=UTF-8');
         await page.close()
         await login_button.click()
-    }
+    } */
 
-    await page.screenshot({ path: 'screenshots/checking1.png' });
-    console.log('checking1 save)')
+    //await page.mouse.move(100, 300);
+    //await login_button.click()
+    //await page.screenshot({ path: 'screenshots/checking1.png' });
+    //console.log('checking save 2')
 
+    const gameContainer = await page.locator('#gameContainer')
 
-    const gameContainer = page.locator('#gameContainer')
-
-    if (gameContainer) {
-        socket.emit('status', 'loading game');
-    }
-    else {
-        socket.emit('status', 'login unsuccessfull');
-        await page.waitForTimeout(2000);
-        socket.emit('status', 'ready');
-        await browser.close().then(() => {
-            console.log('browser closed')
-        });
-        return
-    }
-
-    const progress_bar = page.locator('#game_frame > div.webgl-content > div.game-loading-screen > div.game-loading-screen__container.zindex-2 > div.game-loading-indicator > div.game-loading-progress-bar > div.game-loading-progress-bar__progress-percents')
+    const progress_bar = await page.locator('#game_frame > div.webgl-content > div.game-loading-screen > div.game-loading-screen__container.zindex-2 > div.game-loading-indicator > div.game-loading-progress-bar > div.game-loading-progress-bar__progress-percents')
 
     let progressBarValue = '';
 
     while (progressBarValue !== '100%') {
         progressBarValue = await progress_bar.innerHTML()
+        await page.screenshot({ path: 'screenshots/loading.png' })
         socket.emit('progress', progressBarValue)
         console.log(progressBarValue)
         await page.waitForTimeout(2000)
     }
+    
     console.log('finished')
+    await page.screenshot({ path: 'screenshots/finished.png' })
     await page.waitForTimeout(2000)
     await page.screenshot({ path: 'cross.png', clip: { x: 1244, y: 52, width: 30, height: 28 } });
 
 
-    const { match, reason } = await compare(
-        "cross.png",
-        "idealcross.png",
-        "difference.png",
-        { threshold: 0.5 }
-    );
-    console.log(match, reason)
+    const cross = PNG.sync.read(fs.readFileSync('cross.png'));
+    const idealcross = PNG.sync.read(fs.readFileSync('idealcross.png'));
+    const {width, height} = cross
+
+    const diff = new PNG({width, height});
+
+    pixelmatch(cross.data, idealcross.data, diff.data, width, height, {threshold: 0.1})
+
+    fs.writeFileSync('difference.png', PNG.sync.write(diff));
     /* смотреть насколько загрузилась игра и слать статус в WS  (wait until 100%)
         Подождать вторую загрузку
         emit = game loaded
@@ -137,7 +133,7 @@ socket.on('run_account', async (payload) => {
 
         emit = reading chests
         Запускаем процесс чтения через OCR 
-        Каждый прочитанный сундук отправляем на бэк последовательно и сохраняем их в БД в sqlite3
+        Каждый прочитанный сундук отправляем на бэк последовательно и сохраняем их в БД в postgres
         Конец Фазы II 
 
         emit = ready
