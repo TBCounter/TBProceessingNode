@@ -22,9 +22,16 @@ db.sequelize.sync({ force: true })
 
 
 // Адрес сервера
-const socket = io('http://192.168.114.107:3000/node', {
+// const socket = io(`${process.env.API_URL}/node`, {
+//     transports: ['websocket'], // Использование WebSocket транспорта
+// });
+
+
+// Адрес сервера
+const socket = io(`${'http://192.168.1.133:3000'}/node`, {
     transports: ['websocket'], // Использование WebSocket транспорта
 });
+
 
 // Событие успешного подключения
 socket.on('connect', () => {
@@ -46,6 +53,7 @@ socket.on('disconnect', () => {
 
 // Событие ошибки
 socket.on('connect_error', (error) => {
+    console.log(process.env.API_URL)
     console.error('Connection error:', error);
 });
 
@@ -69,37 +77,54 @@ socket.on('run_account', async (payload) => {
 
     //add fucntion to repeat button click if bot check is failed
     //body > div.font2.error_tooltip.left
-    const login_button = page.locator('#login > div.popup-stretch__content > form > div:nth-child(4) > button')
-    await login_button.click()
+    // await login_button.click()
+    await page.keyboard.press("Enter")
+
     await page.screenshot({ path: 'screenshots/checking1.png' });
     console.log('checking save 1')
+    await page.waitForTimeout(2000);
 
-    /*const bot_check_failed = page.locator('body > div.font2.error_tooltip.left')
-    if (bot_check_failed) {
-        const page = await context.newPage();
-        await page.goto('https://www.google.com/search?q=why+exploiting+software+is+unethical&rlz=1C1FHFK_ruKG1099KG1099&oq=why+exploiting+software+is+unethical&gs_lcrp=EgZjaHJvbWUyBggAEEUYOTIHCAEQIRigAdIBCTEwMTk0ajBqN6gCALACAA&sourceid=chrome&ie=UTF-8');
-        await page.close()
-        await login_button.click()
-    } */
+
+    // const bot_check_failed = page.locator('body > div.font2.error_tooltip.left')
+    // if (bot_check_failed) {
+    //     const page = await context.newPage();
+    //     await page.goto('https://www.google.com/search?q=why+exploiting+software+is+unethical&rlz=1C1FHFK_ruKG1099KG1099&oq=why+exploiting+software+is+unethical&gs_lcrp=EgZjaHJvbWUyBggAEEUYOTIHCAEQIRigAdIBCTEwMTk0ajBqN6gCALACAA&sourceid=chrome&ie=UTF-8');
+    //     await page.close()
+    //     const login_button = page.locator('#login > div.popup-stretch__content > form > div:nth-child(4) > button')
+    //     await login_button.click()
+    // } 
 
     //await page.mouse.move(100, 300);
     //await login_button.click()
-    //await page.screenshot({ path: 'screenshots/checking1.png' });
-    //console.log('checking save 2')
 
-    const gameContainer = await page.locator('#gameContainer')
+    await page.screenshot({ path: 'screenshots/checking2.png' });
+    console.log('checking save 2')
 
-    const progress_bar = await page.locator('#game_frame > div.webgl-content > div.game-loading-screen > div.game-loading-screen__container.zindex-2 > div.game-loading-indicator > div.game-loading-progress-bar > div.game-loading-progress-bar__progress-percents')
-
+    // const gameContainer = await page.locator('#gameContainer')
     let progressBarValue = '';
+    
+    try{
 
-    while (progressBarValue !== '100%') {
-        progressBarValue = await progress_bar.innerHTML()
-        await page.screenshot({ path: 'screenshots/loading.png' })
-        socket.emit('progress', progressBarValue)
-        console.log(progressBarValue)
-        await page.waitForTimeout(2000)
+        const progress_bar = await page.locator('#game_frame > div.webgl-content > div.game-loading-screen > div.game-loading-screen__container.zindex-2 > div.game-loading-indicator > div.game-loading-progress-bar > div.game-loading-progress-bar__progress-percents')
+
+        while (progressBarValue !== '100%') {
+            progressBarValue = await progress_bar.innerHTML()
+            await page.screenshot({ path: 'screenshots/loading.png' })
+            socket.emit('progress', progressBarValue)
+            console.log(progressBarValue)
+            await page.waitForTimeout(2000)
+        }
     }
+    catch{
+        console.log('no progress')
+
+        await browser.close().then(() => {
+            console.log('browser closed')
+        });
+        return 
+    }
+
+
     
     console.log('finished')
     await page.screenshot({ path: 'screenshots/finished.png' })
@@ -143,7 +168,7 @@ socket.on('run_account', async (payload) => {
 
     // await page.screenshot({ path: `nodejs_chromium.png`, fullPage: true });
 
-    // await browser.close().then(() => {
-    //     console.log('browser closed')
-    // });
+    await browser.close().then(() => {
+        console.log('browser closed')
+    });
 })

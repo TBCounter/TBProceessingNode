@@ -7,7 +7,8 @@ services:
 
     volumes:
       - ./screenshots:/app/screenshots
-
+    env_file: ".env"
+    
   db:
     image: postgres
     restart: always
@@ -15,9 +16,11 @@ services:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: tbcounter-node
+      PGPORT: 7432
     networks:
       - backend
-
+    ports:
+      - 7432:7432
 networks:
   backend:
     driver: bridge

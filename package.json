@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "node ./sockets.js"
+    "start": "node --env-file=.env ./sockets.js "
   },
   "dependencies": {
     "@playwright/test": "^1.44.1",
