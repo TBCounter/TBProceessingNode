@@ -1,24 +1,12 @@
 const Sequelize = require("sequelize");
 const path = require('path');
 
-// const sequelize = new Sequelize({
-//     dialect: 'postgres',
-//     database: 'tbcounter-node',
-//     username: process.env.POSTGRES_USER,
-//     password: process.env.POSTGRES_PASSWORD,
-//     host: process.env.DB_HOST,
-//     port: 7432,
-//     ssl: true,
-//     clientMinMessages: 'notice',
-// });
-
-
 const sequelize = new Sequelize({
     dialect: 'postgres',
     database: 'tbcounter-node',
     username: process.env.POSTGRES_USER,
     password: process.env.POSTGRES_PASSWORD,
-    host: "192.168.1.133",
+    host: process.env.DB_HOST,
     port: 7432,
     ssl: true,
     clientMinMessages: 'notice',

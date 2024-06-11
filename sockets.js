@@ -22,15 +22,10 @@ db.sequelize.sync({ force: true })
 
 
 // Адрес сервера
-// const socket = io(`${process.env.API_URL}/node`, {
-//     transports: ['websocket'], // Использование WebSocket транспорта
-// });
-
-
-// Адрес сервера
-const socket = io(`${'http://192.168.1.133:3000'}/node`, {
+const socket = io(process.env.API_URL+`/node`, {
     transports: ['websocket'], // Использование WebSocket транспорта
 });
+
 
 
 // Событие успешного подключения
@@ -53,7 +48,7 @@ socket.on('disconnect', () => {
 
 // Событие ошибки
 socket.on('connect_error', (error) => {
-    console.log(process.env.API_URL)
+    console.log(process.env.API_URL+`/node`)
     console.error('Connection error:', error);
 });
 
@@ -61,7 +56,7 @@ socket.on('connect_error', (error) => {
 
 socket.on('run_account', async (payload) => {
     socket.emit('status', 'opening page');
-    const browser = await playwright['chromium'].launch({ headless: true });
+    const browser = await playwright['chromium'].launch({ headless: false });
     const context = await browser.newContext();
     const page = await context.newPage();
     await page.goto(payload.address);
@@ -85,14 +80,16 @@ socket.on('run_account', async (payload) => {
     await page.waitForTimeout(2000);
 
 
-    // const bot_check_failed = page.locator('body > div.font2.error_tooltip.left')
-    // if (bot_check_failed) {
-    //     const page = await context.newPage();
-    //     await page.goto('https://www.google.com/search?q=why+exploiting+software+is+unethical&rlz=1C1FHFK_ruKG1099KG1099&oq=why+exploiting+software+is+unethical&gs_lcrp=EgZjaHJvbWUyBggAEEUYOTIHCAEQIRigAdIBCTEwMTk0ajBqN6gCALACAA&sourceid=chrome&ie=UTF-8');
-    //     await page.close()
-    //     const login_button = page.locator('#login > div.popup-stretch__content > form > div:nth-child(4) > button')
-    //     await login_button.click()
-    // } 
+    const bot_check_failed = page.locator('body > div.font2.error_tooltip.left')
+    if (bot_check_failed) {
+        const page2 = await context.newPage();
+        await page2.waitForTimeout(500);
+        await page2.goto('https://www.google.com/search?q=why+exploiting+software+is+unethical&rlz=1C1FHFK_ruKG1099KG1099&oq=why+exploiting+software+is+unethical&gs_lcrp=EgZjaHJvbWUyBggAEEUYOTIHCAEQIRigAdIBCTEwMTk0ajBqN6gCALACAA&sourceid=chrome&ie=UTF-8');
+        await page2.waitForTimeout(500);
+        await page2.close()
+        const login_button = page.locator('#login > div.popup-stretch__content > form > div:nth-child(4) > button')
+        await login_button.click()
+    } 
 
     //await page.mouse.move(100, 300);
     //await login_button.click()
