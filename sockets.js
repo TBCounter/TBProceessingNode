@@ -56,7 +56,7 @@ socket.on('connect_error', (error) => {
 
 socket.on('run_account', async (payload) => {
     socket.emit('status', 'opening page');
-    const browser = await playwright['chromium'].launch({ headless: false });
+    const browser = await playwright['chromium'].launch({ headless: true });
     const context = await browser.newContext();
     const page = await context.newPage();
     await page.goto(payload.address);
@@ -78,22 +78,35 @@ socket.on('run_account', async (payload) => {
     await page.screenshot({ path: 'screenshots/checking1.png' });
     console.log('checking save 1')
     await page.waitForTimeout(2000);
-
+    const auth_btn = page.locator('#login > div.popup-stretch__content > form > div:nth-child(4) > button')
+    
+    await page.waitForTimeout(Math.random() * 1000);
+    try {
+        const cookie_button = await page.locator('#cky-btn-accept')
+        await cookie_button.click()
+    } catch (err) {
+        console.log(err)
+    }
 
     const bot_check_failed = page.locator('body > div.font2.error_tooltip.left')
     if (bot_check_failed) {
-        const page2 = await context.newPage();
-        await page2.waitForTimeout(500);
-        await page2.goto('https://www.google.com/search?q=why+exploiting+software+is+unethical&rlz=1C1FHFK_ruKG1099KG1099&oq=why+exploiting+software+is+unethical&gs_lcrp=EgZjaHJvbWUyBggAEEUYOTIHCAEQIRigAdIBCTEwMTk0ajBqN6gCALACAA&sourceid=chrome&ie=UTF-8');
-        await page2.waitForTimeout(500);
-        await page2.close()
-        const login_button = page.locator('#login > div.popup-stretch__content > form > div:nth-child(4) > button')
-        await login_button.click()
-    } 
+        try {
+            console.log('bot check failed')
+        await page.waitForTimeout(Math.random() * 1000 + 2000)
+        botCheckCrack(page, auth_btn)
+            console.log('bot check crack attempted')
+        await page.waitForTimeout(Math.random() * 1000 + 2000)
+        botCheckCrack2(page)
+            console.log('bot check crack attempted 2')
+        } catch (err) {
+            console.log(err)
+            return
+        }
+    }
 
     //await page.mouse.move(100, 300);
     //await login_button.click()
-
+    await page.waitForTimeout(4000)
     await page.screenshot({ path: 'screenshots/checking2.png' });
     console.log('checking save 2')
 
@@ -135,9 +148,56 @@ socket.on('run_account', async (payload) => {
 
     const diff = new PNG({width, height});
 
-    pixelmatch(cross.data, idealcross.data, diff.data, width, height, {threshold: 0.1})
+    const diffPixels = await pixelmatch(cross.data, idealcross.data, diff.data, width, height, {threshold: 0.1})
 
     fs.writeFileSync('difference.png', PNG.sync.write(diff));
+
+    if (diffPixels < 100) {
+        console.log(diffPixels);
+        await page.waitForTimeout(2000)
+        try {
+            await page.mouse.click(1244, 52);
+            await page.waitForTimeout(2000)
+        } catch (err) {
+            console.log(err)
+        }
+    }
+    socket.emit('status', 'game loaded')
+    console.log('game loaded')
+    await page.screenshot({ path: 'screenshots/gameloaded.png' })
+
+    await page.waitForTimeout(2000)
+
+    await page.keyboard.press('Escape');
+    await page.keyboard.press('Escape');
+    await page.keyboard.press('Escape');
+
+    await page.waitForTimeout(2000)
+
+    await page.keyboard.press('Escape');
+    await page.keyboard.press('Escape');
+    await page.keyboard.press('Escape');
+
+    
+    await page.screenshot({ path: 'screenshots/readyforopening.png' })
+    socket.emit('status', 'ready for opening')
+    console.log('ready for opening')
+    //saving avatar
+    socket.emit('status', 'saving banks')
+    console.log('saving banks')
+
+    await page.waitForTimeout(1000)
+    await page.screenshot({ path: 'screenshots/clicked.png', clip: { x: 700, y: 640, width: 60, height: 60 } });
+    await page.mouse.click(700, 640);
+
+    await page.waitForTimeout(1000)
+    await page.mouse.click(180, 250);
+
+    await page.waitForTimeout(1000)
+    await page.mouse.click(700, 145);
+
+    await page.screenshot({ path: 'screenshots/truimphchestlist.png' })
+    await page.waitForTimeout(30000)
     /* смотреть насколько загрузилась игра и слать статус в WS  (wait until 100%)
         Подождать вторую загрузку
         emit = game loaded
@@ -169,3 +229,50 @@ socket.on('run_account', async (payload) => {
         console.log('browser closed')
     });
 })
+
+
+
+async function botCheckCrack(page, auth_btn) {
+    try {
+    await page.mouse.move(Math.random() * 100, Math.random() * 100);
+    await page.mouse.move(Math.random() * 100, Math.random() * 100);
+    await page.mouse.move(Math.random() * 100, Math.random() * 100);
+    await page.mouse.move(Math.random() * 100, Math.random() * 100);
+    await page.mouse.move(Math.random() * 100, Math.random() * 100);
+    await page.waitForTimeout(Math.random() * 1000)
+
+    //await auth_btn.click()
+    await page.mouse.click(340, 340);
+    await page.waitForTimeout(Math.random() * 1000 + 1000)
+    //await auth_btn.click()
+    await page.mouse.click(340, 320);
+    } catch (err) {
+        console.log(err)
+    }
+}
+
+async function botCheckCrack2(page) {
+    try {
+    await page.waitForTimeout(Math.random() * 1000)
+
+    const context = await browser.newContext();
+    const page2 = await context.newPage();
+    await page2.waitForTimeout(Math.random() * 3000)
+    await page2.goto('https://www.google.com/search?q=do+a+barrel+roll&rlz=1C1FHFK_ruKG1099KG1099&oq=do+a+barrel+roll&gs_lcrp=EgZjaHJvbWUqBwgAEAAYjwIyBwgAEAAYjwIyDAgBEC4YQxiABBiKBTIHCAIQABiABDIHCAMQABiABDIHCAQQABiABDIHCAUQABiABDIHCAYQABiABDIMCAcQABhDGIAEGIoFMgwICBAAGEMYgAQYigUyBwgJEAAYgATSAQg0NDM1ajBqN6gCALACAA&sourceid=chrome&ie=UTF-8#ip=1');
+    await page2.waitForTimeout(Math.random() * 6000)
+    await page2.close()
+
+    await page.waitForTimeout(Math.random() * 1000 + 3000)
+    await page.mouse.click(Math.random() * 1000, 320);
+    await page.waitForTimeout(Math.random() * 1000)
+    await page.mouse.click(Math.random() * 1000, 320);
+    await page.waitForTimeout(Math.random() * 1000)
+    await page.mouse.click(Math.random() * 1000, 320);
+    await page.waitForTimeout(Math.random() * 1000)
+    await page.mouse.click(Math.random() * 1000, 320);
+    await page.waitForTimeout(Math.random() * 1000)
+    await page.mouse.click(Math.random() * 1000, 320);
+    } catch (err) {
+        console.log(err)
+    }
+}
