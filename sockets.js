@@ -22,7 +22,7 @@ db.sequelize.sync({ force: true })
 
 
 // Адрес сервера
-const socket = io(process.env.API_URL+`/node`, {
+const socket = io(process.env.API_URL + `/node`, {
     transports: ['websocket'], // Использование WebSocket транспорта
 });
 
@@ -48,7 +48,7 @@ socket.on('disconnect', () => {
 
 // Событие ошибки
 socket.on('connect_error', (error) => {
-    console.log(process.env.API_URL+`/node`)
+    console.log(process.env.API_URL + `/node`)
     console.error('Connection error:', error);
 });
 
@@ -103,21 +103,21 @@ socket.on('run_account', async (payload) => {
     console.log('page opened')
         
 
-        await loginFunc(page, payload)
+    await loginFunc(page, payload)
 
     //bot authentication required
 
-        await cookieFunc(page)
+    await cookieFunc(page)
 
-        await progressFunc(page)
+    await progressFunc(page)
 
     //second progress
-    
-        await adSkipFunc(page)
+
+    await adSkipFunc(page)
 
     //saving avatar
 
-        await openBanksFunc(page)
+    await openBanksFunc(page)
     await page.waitForTimeout(30000)
 
 
@@ -157,7 +157,7 @@ async function loginFunc(page, payload) {
     try {
         const login_btn = page.locator('#registration > div.popup-stretch__content > div > form > div.aligncenter.t1_14.mb10 > span')
         await login_btn.click();
-    
+
         const login = page.locator("#login > div.popup-stretch__content > form > div:nth-child(2) > div > input[type=email]")
         await login.fill(payload.login)
 
@@ -165,7 +165,7 @@ async function loginFunc(page, payload) {
         await password.fill(payload.password)
 
         await page.keyboard.press("Enter")
-    
+
         await page.screenshot({ path: 'screenshots/checking1.png' });
         console.log('checking save 1')
         await page.waitForTimeout(4000);
@@ -217,18 +217,18 @@ async function adSkipFunc(page) {
         await page.screenshot({ path: 'screenshots/finished.png' })
         await page.waitForTimeout(2000)
         await page.screenshot({ path: 'cross.png', clip: { x: 1244, y: 52, width: 30, height: 28 } });
-    
-    
+
+
         const cross = PNG.sync.read(fs.readFileSync('cross.png'));
         const idealcross = PNG.sync.read(fs.readFileSync('idealcross.png'));
-        const {width, height} = cross
-    
-        const diff = new PNG({width, height});
-    
-        const diffPixels = await pixelmatch(cross.data, idealcross.data, diff.data, width, height, {threshold: 0.1})
-    
+        const { width, height } = cross
+
+        const diff = new PNG({ width, height });
+
+        const diffPixels = await pixelmatch(cross.data, idealcross.data, diff.data, width, height, { threshold: 0.1 })
+
         fs.writeFileSync('difference.png', PNG.sync.write(diff));
-    
+
         if (diffPixels < 100) {
             console.log(diffPixels);
 
@@ -242,23 +242,23 @@ async function adSkipFunc(page) {
         console.log('game loaded')
 
         await page.waitForTimeout(2000)
-    
+
         await page.keyboard.press('Escape');
         await page.keyboard.press('Escape');
         await page.keyboard.press('Escape');
-    
+
         await page.waitForTimeout(2000)
-    
+
         await page.keyboard.press('Escape');
         await page.keyboard.press('Escape');
         await page.keyboard.press('Escape');
-    
-        
+
+
         await page.screenshot({ path: 'screenshots/readyforopening.png' })
         socket.emit('status', 'ready for opening')
         console.log('ready for opening')
 
-        
+
         console.log('Ad skip function executed successfuly')
     } catch (err) {
         console.log('An error has occured during execution of ad skip function:', err)
@@ -269,20 +269,20 @@ async function openBanksFunc(page) {
     try {
         socket.emit('status', 'saving banks')
         console.log('saving banks')
-    
+
         await page.waitForTimeout(1000)
         await page.screenshot({ path: 'screenshots/clicked.png', clip: { x: 700, y: 640, width: 60, height: 60 } });
         await page.mouse.click(700, 640);
-    
+
         await page.waitForTimeout(1000)
         await page.mouse.click(180, 250);
-    
+
         await page.waitForTimeout(1000)
         await page.mouse.click(700, 145);
-    
+
         await page.screenshot({ path: 'screenshots/truimphchestlist.png' })
 
-        
+
         console.log('Opening banks function executed successfuly')
     } catch (err) {
         console.log('An error has occured during execution of opening banks function:', err)
