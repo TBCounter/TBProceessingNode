@@ -52,15 +52,56 @@ socket.on('connect_error', (error) => {
     console.error('Connection error:', error);
 });
 
+socket.on('run_cookie', async (payload) => {
+    const { cookie } = await payload
 
-//create another socket on RUN ACCOUNT COOKIES
+    let cookieName = []
+    let cookieValue = []
+
+    const cookies = {}
+
+    for (let n = 0; n < Object.keys(cookie).length; n++) {
+        cookieName[n] = Object.keys(cookie)[n]
+        cookieValue[n] = Object.values(cookie)[n]
+
+        cookies[n] = {name: cookieName[n], value: cookieValue[n], domain: '.totalbattle.com', path: '/', secure: true, httpOnly: true}
+    }
+
+    socket.emit('status', 'opening page');
+    console.log('run account')
+    const browser = await playwright['chromium'].launch({ headless: false });
+    console.log('browser opened')
+    const context = await browser.newContext();
+    const page = await context.newPage();
+    await context.addCookies(Object.values(cookies))
+    await page.goto(payload.address);
+    console.log('page opened')
+
+    
+
+    await progressFunc(page)
+
+    //second progress
+    
+    await adSkipFunc(page)
+
+    //saving avatar
+
+    await openBanksFunc(page)
+    await page.waitForTimeout(30000)
+})
+
 socket.on('run_account', async (payload) => {
     // init page
     socket.emit('status', 'opening page');
+    console.log('run account')
     const browser = await playwright['chromium'].launch({ headless: false });
+    console.log('browser opened')
     const context = await browser.newContext();
     const page = await context.newPage();
     await page.goto(payload.address);
+    console.log('page opened')
+        
 
         await loginFunc(page, payload)
 
@@ -81,7 +122,7 @@ socket.on('run_account', async (payload) => {
 
 
     /*  смотреть насколько загрузилась игра и слать статус в WS  (wait until 100%) (+)
-        Подождать вторую загрузку (+)
+        Подождать вторую загрузку
         emit = game loaded (+)
         нажать esc несколько раз, потом подождать секунду-две и снова нажать несколько раз (+)
         emit = ready for opening (+)
