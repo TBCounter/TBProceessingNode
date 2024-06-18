@@ -81,7 +81,7 @@ socket.on('run_cookie', async (payload) => {
 
     await progressFunc(page)
 
-    //second progress
+    await secondProgressFunc(page)
     
     await adSkipFunc(page)
 
@@ -111,7 +111,7 @@ socket.on('run_account', async (payload) => {
 
     await progressFunc(page)
 
-    //second progress
+    await secondProgressFunc(page)
 
     await adSkipFunc(page)
 
@@ -209,6 +209,32 @@ async function progressFunc(page) {
         console.log('Progress function executed successfuly')
     } catch (err) {
         console.log('An error has occured during execution of progress function:', err)
+    }
+}
+
+async function secondProgressFunc(page) {
+    try {
+        await page.waitForTimeout(2000)
+
+        await page.screenshot({ path: 'screenshots/secondprogress.png', clip: { x: 444, y: 48, width: 529, height: 40 } });
+
+        const secondprogress = PNG.sync.read(fs.readFileSync('screenshots/secondprogress.png'));
+        const isloaded = PNG.sync.read(fs.readFileSync('isloaded.png'));
+        const { width, height } = secondprogress
+
+        const diff = new PNG({ width, height });
+
+        const diffPixels = await pixelmatch(secondprogress.data, isloaded.data, diff.data, width, height, { threshold: 0.1 })
+
+        fs.writeFileSync('second_diff.png', PNG.sync.write(diff));
+        console.log(diffPixels)
+        if (diffPixels > 5000) {
+            await secondProgressFunc(page)
+        }
+       
+        console.log('Second progress function executed successfuly')
+    } catch (err) {
+        console.log('An error has occured during execution of second progress function:', err)
     }
 }
 
