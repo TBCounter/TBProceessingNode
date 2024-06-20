@@ -76,8 +76,9 @@ socket.on('run_cookie', async (payload) => {
     await context.addCookies(Object.values(cookies))
     await page.goto(payload.address);
     console.log('page opened')
+    let n = 0
 
-    
+    await cookieFunc(page)
 
     await progressFunc(page)
 
@@ -86,8 +87,7 @@ socket.on('run_cookie', async (payload) => {
     await adSkipFunc(page)
 
     //saving avatar
-
-    await openBanksFunc(page)
+    await openBanksFunc(page, n)
     await page.waitForTimeout(30000)
 })
 
@@ -122,7 +122,7 @@ socket.on('run_account', async (payload) => {
 
 
     /*  смотреть насколько загрузилась игра и слать статус в WS  (wait until 100%) (+)
-        Подождать вторую загрузку
+        Подождать вторую загрузку (+)
         emit = game loaded (+)
         нажать esc несколько раз, потом подождать секунду-две и снова нажать несколько раз (+)
         emit = ready for opening (+)
@@ -291,26 +291,112 @@ async function adSkipFunc(page) {
     }
 }
 
-async function openBanksFunc(page) {
+async function openBanksFunc(page, n) {
     try {
         socket.emit('status', 'saving banks')
         console.log('saving banks')
 
-        await page.waitForTimeout(1000)
-        await page.screenshot({ path: 'screenshots/clicked.png', clip: { x: 700, y: 640, width: 60, height: 60 } });
-        await page.mouse.click(700, 640);
+        await clanCheckFunc(page)
 
         await page.waitForTimeout(1000)
-        await page.mouse.click(180, 250);
+        await page.mouse.click(180, 250); // clicks on banks button
 
         await page.waitForTimeout(1000)
-        await page.mouse.click(700, 145);
+        await page.mouse.click(700, 145); // clicks on triumph chests button
 
         await page.screenshot({ path: 'screenshots/truimphchestlist.png' })
+        await page.waitForTimeout(1000)
+        await page.screenshot({ path: 'screenshots/triumphchestlistempty.png', clip: { x: 500, y: 225, width: 612, height: 350 } });
 
+        await page.waitForTimeout(1000)
+        const isEmptyList = PNG.sync.read(fs.readFileSync('screenshots/triumphchestlistempty.png'));
+        const idealList = PNG.sync.read(fs.readFileSync('screenshots/ideal_list.png'));
+        const { width, height } = isEmptyList
+
+        const diff = new PNG({ width, height });
+
+        const diffPixels = await pixelmatch(isEmptyList.data, idealList.data, diff.data, width, height, { threshold: 0.1 })
+
+        fs.writeFileSync('diff_list.png', PNG.sync.write(diff));
+        console.log(diffPixels)
+
+        if (diffPixels > 5000) {
+            console.log('scaning triumph chests')
+            await chestScanFunc(page, n, 'triumphchest')
+        }
+
+        await page.waitForTimeout(1000)
+        await page.mouse.click(500, 145); // clicks on chests button
+
+        await chestScanFunc(page, n, 'chest')
 
         console.log('Opening banks function executed successfuly')
     } catch (err) {
         console.log('An error has occured during execution of opening banks function:', err)
+    }
+}
+
+async function chestScanFunc(page, n, name) {
+    try {
+        n++
+        await page.screenshot({ path: 'screenshots/scroll.png', clip: { x: 1090, y: 540, width: 30, height: 60 } });
+        await page.mouse.click(180, 250); // clicks on banks button
+        await page.screenshot({ path: `screenshots/${name}s/${name}${n}.png`, clip: { x: 340, y: 175, width: 780, height: 120 } });
+
+        const scroll = PNG.sync.read(fs.readFileSync('screenshots/scroll.png'));
+        const scrollUnfinished = PNG.sync.read(fs.readFileSync('scroll_unfinished.png'));
+        const { width, height } = scroll
+
+        const scrollDiff = new PNG({ width, height });
+
+        const scrollDiffPixels = await pixelmatch(scroll.data, scrollUnfinished.data, scrollDiff.data, width, height, { threshold: 0.1 })
+
+        fs.writeFileSync('diff_scroll.png', PNG.sync.write(scrollDiff));
+        
+        if (scrollDiffPixels > 20) {
+            await page.mouse.move(700, 370);
+            await page.mouse.wheel(0, 500)
+            await page.mouse.wheel(0, 500)
+            await chestScanFunc(page, n, name)
+        } else {
+            // counts 3 remaining chests
+            console.log(n)
+            await page.screenshot({ path: `screenshots/${name}s/${name}${n}.png`, clip: { x: 340, y: 284, width: 780, height: 105 } });
+            n++
+            await page.screenshot({ path: `screenshots/${name}s/${name}${n}.png`, clip: { x: 340, y: 384, width: 780, height: 105 } });
+            n++
+            await page.screenshot({ path: `screenshots/${name}s/${name}${n}.png`, clip: { x: 340, y: 484, width: 780, height: 105 } });
+        }
+    } catch (err) {
+        console.log('An error has occured during execution of chest scan function:', err)
+    }
+}
+
+async function clanCheckFunc(page) {
+    try {
+        await page.mouse.click(700, 640); // clicks on clan button
+        await page.waitForTimeout(500)
+        await page.mouse.click(700, 640); // clicks on clan button
+        await page.waitForTimeout(500)
+        await page.screenshot({ path: 'screenshots/clan.png' })
+
+        const clan = PNG.sync.read(fs.readFileSync('screenshots/clan.png'));
+        const hopefullyClan = PNG.sync.read(fs.readFileSync('screenshots/hopefully_clan.png'));
+        const { width, height } = clan
+
+        const clanDiff = new PNG({ width, height });
+
+        const clanDiffPixels = await pixelmatch(clan.data, hopefullyClan.data, clanDiff.data, width, height, { threshold: 0.1 })
+
+        fs.writeFileSync('diff_clan.png', PNG.sync.write(clanDiff));
+        console.log(clanDiffPixels)
+
+        if (clanDiffPixels > 1000000) {
+            await clanCheckFunc(page)
+        }
+
+        console.log('Clan check function executed successfuly')
+    } catch (err) {
+        console.log('An error has occured during execution of clan check function:', err)
     }
 }
