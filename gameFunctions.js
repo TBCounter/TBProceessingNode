@@ -2,9 +2,7 @@
 
 const PNG = require("pngjs").PNG;
 const pixelmatch = require("pixelmatch");
-const io = require("socket.io-client");
-const db = require("./database");
-const playwright = require("playwright");
+
 const fs = require("fs");
 
 async function loginFunc(page, payload) {
