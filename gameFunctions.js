@@ -65,7 +65,7 @@ async function secondProgressFunc(page) {
     const secondprogress = PNG.sync.read(
       fs.readFileSync("screenshots/secondprogress.png")
     );
-    const isloaded = PNG.sync.read(fs.readFileSync("isloaded.png"));
+    const isloaded = PNG.sync.read(fs.readFileSync("ideal_screenshots/isloaded.png"));
     const { width, height } = secondprogress;
 
     const diff = new PNG({ width, height });
@@ -107,8 +107,8 @@ async function chestScanFunc(page, count, name) {
     });
 
     const scroll = PNG.sync.read(fs.readFileSync("screenshots/scroll.png"));
-    const scrollUnfinished = PNG.sync.read(
-      fs.readFileSync("scroll_unfinished.png")
+    const scrollFinished = PNG.sync.read(
+      fs.readFileSync("ideal_screenshots/scroll_finished.png")
     );
     const { width, height } = scroll;
 
@@ -116,7 +116,7 @@ async function chestScanFunc(page, count, name) {
 
     const scrollDiffPixels = await pixelmatch(
       scroll.data,
-      scrollUnfinished.data,
+      scrollFinished.data,
       scrollDiff.data,
       width,
       height,
@@ -168,7 +168,7 @@ async function clanCheckFunc(page) {
     });
 
     const clan = PNG.sync.read(fs.readFileSync("screenshots/clan.png"));
-    const hopefullyClan = PNG.sync.read(fs.readFileSync("ideal_clan.png"));
+    const hopefullyClan = PNG.sync.read(fs.readFileSync("ideal_screenshots/ideal_clan.png"));
     const { width, height } = clan;
 
     const clanDiff = new PNG({ width, height });
@@ -207,7 +207,7 @@ async function isEmptyFunc(page) {
   const isEmptyList = PNG.sync.read(
     fs.readFileSync("screenshots/triumphchestlistempty.png")
   );
-  const idealList = PNG.sync.read(fs.readFileSync("ideal_list.png"));
+  const idealList = PNG.sync.read(fs.readFileSync("ideal_screenshots/ideal_list.png"));
   const { width, height } = isEmptyList;
 
   const diff = new PNG({ width, height });
@@ -242,7 +242,7 @@ async function noScrollFunc(page, count, name) {
     const noScroll = PNG.sync.read(
       fs.readFileSync("screenshots/no_scroll.png")
     );
-    const idealScroll = PNG.sync.read(fs.readFileSync("ideal_scroll.png"));
+    const idealScroll = PNG.sync.read(fs.readFileSync("ideal_screenshots/ideal_scroll.png"));
     const { width, height } = noScroll;
 
     const diff = new PNG({ width, height });
@@ -304,7 +304,7 @@ async function noChestFunc(name) {
       const noChest = PNG.sync.read(
         fs.readFileSync(`screenshots/${name}s/${name}${n}.png`)
       );
-      const emptyChest = PNG.sync.read(fs.readFileSync("no_chest.png"));
+      const emptyChest = PNG.sync.read(fs.readFileSync("ideal_screenshots/no_chest.png"));
       const { width, height } = noChest;
 
       const diff = new PNG({ width, height });

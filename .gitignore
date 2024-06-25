@@ -137,3 +137,6 @@ dist
 *.db
 
 screenshots/*.png
+
+screenshots/chests/*.png
+screenshots/triumphchests/*.png

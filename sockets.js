@@ -86,6 +86,8 @@ socket.on("run_cookie", async (payload) => {
 
   socket.emit("status", "opening page");
   console.log("run account");
+
+  console.log(process.env.HEADLESS === 'true')
   const browser = await playwright["chromium"].launch({ headless: process.env.HEADLESS === 'true' });
   console.log("browser opened");
   const context = await browser.newContext();
@@ -227,12 +229,12 @@ async function adSkipFunc(page) {
     await page.screenshot({ path: "screenshots/finished.png" });
     await page.waitForTimeout(2000);
     await page.screenshot({
-      path: "cross.png",
+      path: "screenshots/cross.png",
       clip: { x: 1244, y: 52, width: 30, height: 28 },
     });
 
-    const cross = PNG.sync.read(fs.readFileSync("cross.png"));
-    const idealcross = PNG.sync.read(fs.readFileSync("idealcross.png"));
+    const cross = PNG.sync.read(fs.readFileSync("screenshots/cross.png"));
+    const idealcross = PNG.sync.read(fs.readFileSync("ideal_screenshots/idealcross.png"));
     const { width, height } = cross;
 
     const diff = new PNG({ width, height });
