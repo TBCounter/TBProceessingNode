@@ -232,7 +232,10 @@ async function isEmptyFunc(page) {
   }
 }
 
-async function noScrollFunc(page, count, name) {
+async function noScrollFunc(page, count, name) { 
+  /**
+   * TODO Rewrite this function to have ONE PURPOSE
+   */
   try {
     await page.screenshot({
       path: "screenshots/no_scroll.png",
