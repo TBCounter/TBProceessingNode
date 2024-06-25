@@ -25,11 +25,9 @@ async function loginFunc(page, payload) {
     await page.keyboard.press("Enter");
 
     await page.screenshot({ path: "screenshots/checking1.png" });
-    console.log("checking save 1");
     await page.waitForTimeout(4000);
 
     await page.screenshot({ path: "screenshots/checking2.png" });
-    console.log("checking save 2");
 
     console.log("Login function executed successfuly");
   } catch (err) {
@@ -82,7 +80,6 @@ async function secondProgressFunc(page) {
     );
 
     fs.writeFileSync("second_diff.png", PNG.sync.write(diff));
-    console.log(diffPixels);
     if (diffPixels > 5000) {
       await secondProgressFunc(page);
     }
@@ -135,7 +132,6 @@ async function chestScanFunc(page, count, name) {
       await chestScanFunc(page, count, name);
     } else {
       // counts 3 remaining chests
-      console.log(count);
       count++;
       await page.screenshot({
         path: `screenshots/${name}s/${name}${count}.png`,
@@ -187,7 +183,6 @@ async function clanCheckFunc(page) {
     );
 
     fs.writeFileSync("diff_clan.png", PNG.sync.write(clanDiff));
-    console.log(clanDiffPixels);
 
     if (clanDiffPixels > 1000) {
       await clanCheckFunc(page);
@@ -227,7 +222,6 @@ async function isEmptyFunc(page) {
   );
 
   fs.writeFileSync("diff_list.png", PNG.sync.write(diff));
-  console.log(diffPixels);
 
   if (diffPixels < 5000) {
     console.log("empty");
@@ -263,7 +257,6 @@ async function noScrollFunc(page, count, name) {
     );
 
     fs.writeFileSync("diff_noscroll.png", PNG.sync.write(diff));
-    console.log(diffPixels);
 
     if (diffPixels > 100) {
       console.log("no scroll");
