@@ -86,7 +86,7 @@ socket.on("run_cookie", async (payload) => {
 
   socket.emit("status", "opening page");
   console.log("run account");
-  const browser = await playwright["chromium"].launch({ headless: false });
+  const browser = await playwright["chromium"].launch({ headless: process.env.HEADLESS === 'true' });
   console.log("browser opened");
   const context = await browser.newContext();
   const page = await context.newPage();
@@ -137,7 +137,7 @@ socket.on("run_account", async (payload) => {
   // init page
   socket.emit("status", "opening page");
   console.log("run account");
-  const browser = await playwright["chromium"].launch({ headless: false });
+  const browser = await playwright["chromium"].launch({ headless: process.env.HEADLESS === 'true' });
   console.log("browser opened");
   const context = await browser.newContext();
   const page = await context.newPage();
