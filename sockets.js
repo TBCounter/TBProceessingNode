@@ -207,7 +207,7 @@ async function progressFunc(page) {
     while (progressBarValue !== "100%") {
       progressBarValue = await progress_bar.innerHTML();
       await page.screenshot({ path: "screenshots/loading.png" });
-      socket.emit("progress", progressBarValue);
+      socket.emit("progress", progressBarValue); // прокинуть сокеты в функцию
       console.log(progressBarValue);
       await page.waitForTimeout(2000);
     }
@@ -256,7 +256,7 @@ async function adSkipFunc(page) {
       await page.waitForTimeout(2000);
     }
 
-    socket.emit("status", "game loaded");
+    socket.emit("status", "game loaded"); // вынести вне функции
     await page.screenshot({ path: "screenshots/gameloaded.png" });
     console.log("game loaded");
 
@@ -273,7 +273,7 @@ async function adSkipFunc(page) {
     await page.keyboard.press("Escape");
 
     await page.screenshot({ path: "screenshots/readyforopening.png" });
-    socket.emit("status", "ready for opening");
+    socket.emit("status", "ready for opening"); // вынести вне функции
     console.log("ready for opening");
 
     console.log("Ad skip function executed successfuly");
@@ -287,7 +287,7 @@ async function adSkipFunc(page) {
 
 async function openBanksPageFunc(page) {
   try {
-    socket.emit("status", "saving banks");
+    socket.emit("status", "saving banks"); // вынести вне функции
     console.log("saving banks");
 
     await clanCheckFunc(page);
