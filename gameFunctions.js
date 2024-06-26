@@ -53,6 +53,31 @@ async function cookieFunc(page) {
   }
 }
 
+async function progressFunc(page, socket) {
+  try {
+    let progressBarValue = "";
+    const progress_bar = await page.locator(
+      "#game_frame > div.webgl-content > div.game-loading-screen > div.game-loading-screen__container.zindex-2 > div.game-loading-indicator > div.game-loading-progress-bar > div.game-loading-progress-bar__progress-percents"
+    );
+
+    while (progressBarValue !== "100%") {
+      progressBarValue = await progress_bar.innerHTML();
+      await page.screenshot({ path: "screenshots/loading.png" });
+      socket.emit("progress", progressBarValue);
+      console.log(progressBarValue);
+      await page.waitForTimeout(2000);
+    }
+    console.log("finished");
+
+    console.log("Progress function executed successfuly");
+  } catch (err) {
+    console.log(
+      "An error has occured during execution of progress function:",
+      err
+    );
+  }
+}
+
 async function secondProgressFunc(page) {
   try {
     await page.waitForTimeout(2000);
@@ -333,14 +358,101 @@ async function noChestFunc(name) {
     );
   }
 }
+async function adSkipFunc(page, socket) {
+  try {
+    await page.screenshot({ path: "screenshots/finished.png" });
+    await page.waitForTimeout(2000);
+    await page.screenshot({
+      path: "screenshots/cross.png",
+      clip: { x: 1244, y: 52, width: 30, height: 28 },
+    });
+
+    const cross = PNG.sync.read(fs.readFileSync("screenshots/cross.png"));
+    const idealcross = PNG.sync.read(fs.readFileSync("ideal_screenshots/idealcross.png"));
+    const { width, height } = cross;
+
+    const diff = new PNG({ width, height });
+
+    const diffPixels = pixelmatch(
+      cross.data,
+      idealcross.data,
+      diff.data,
+      width,
+      height,
+      { threshold: 0.1 }
+    );
+
+    fs.writeFileSync("difference.png", PNG.sync.write(diff));
+
+    if (diffPixels < 100) {
+      console.log(diffPixels);
+
+      await page.waitForTimeout(2000);
+      await page.mouse.click(1244, 52);
+      await page.waitForTimeout(2000);
+    }
+
+    socket.emit("status", "game loaded"); // вынести вне функции
+    await page.screenshot({ path: "screenshots/gameloaded.png" });
+    console.log("game loaded");
+
+    await page.waitForTimeout(2000);
+
+    await page.keyboard.press("Escape");
+    await page.keyboard.press("Escape");
+    await page.keyboard.press("Escape");
+
+    await page.waitForTimeout(2000);
+
+    await page.keyboard.press("Escape");
+    await page.keyboard.press("Escape");
+    await page.keyboard.press("Escape");
+
+    await page.screenshot({ path: "screenshots/readyforopening.png" });
+    socket.emit("status", "ready for opening"); // вынести вне функции
+    console.log("ready for opening");
+
+    console.log("Ad skip function executed successfuly");
+  } catch (err) {
+    console.log(
+      "An error has occured during execution of ad skip function:",
+      err
+    );
+  }
+}
+
+async function openBanksPageFunc(page, socket) {
+  try {
+    socket.emit("status", "saving banks"); // вынести вне функции
+    console.log("saving banks");
+
+    await clanCheckFunc(page);
+
+    await page.waitForTimeout(1000);
+    await page.mouse.click(180, 250); // clicks on banks button
+
+    await page.waitForTimeout(1000);
+    await page.mouse.click(700, 145);
+
+    // clicks on triumph chests button
+  } catch (err) {
+    console.log(
+      "An error has occured during an execution of open banks page function",
+      err
+    );
+  }
+}
 
 module.exports = {
   loginFunc,
   cookieFunc,
+  progressFunc,
   secondProgressFunc,
   chestScanFunc,
   clanCheckFunc,
   isEmptyFunc,
   noScrollFunc,
   noChestFunc,
+  adSkipFunc,
+  openBanksPageFunc
 };
