@@ -153,22 +153,7 @@ async function chestScanFunc(page, count, name) {
       await page.mouse.wheel(0, 500);
       await chestScanFunc(page, count, name);
     } else {
-      // counts 3 remaining chests
-      count++;
-      await page.screenshot({
-        path: `screenshots/${name}s/${name}${count}.png`,
-        clip: { x: 340, y: 284, width: 780, height: 105 },
-      });
-      count++;
-      await page.screenshot({
-        path: `screenshots/${name}s/${name}${count}.png`,
-        clip: { x: 340, y: 384, width: 780, height: 105 },
-      });
-      count++;
-      await page.screenshot({
-        path: `screenshots/${name}s/${name}${count}.png`,
-        clip: { x: 340, y: 484, width: 780, height: 105 },
-      });
+      await lastChestsFunc(page, name, count)
     }
   } catch (err) {
     console.log(
@@ -255,6 +240,7 @@ async function noScrollFunc(page, count, name) {
    * TODO Rewrite this function to have ONE PURPOSE
    */
   try {
+    const lastChests = true
     await page.screenshot({
       path: "screenshots/no_scroll.png",
       clip: { x: 1090, y: 160, width: 27, height: 450 },
@@ -281,25 +267,7 @@ async function noScrollFunc(page, count, name) {
       console.log("no scroll");
 
       count++;
-      await page.screenshot({
-        path: `screenshots/${name}s/${name}${count}.png`,
-        clip: { x: 340, y: 175, width: 780, height: 105 },
-      });
-      count++;
-      await page.screenshot({
-        path: `screenshots/${name}s/${name}${count}.png`,
-        clip: { x: 340, y: 284, width: 780, height: 105 },
-      });
-      count++;
-      await page.screenshot({
-        path: `screenshots/${name}s/${name}${count}.png`,
-        clip: { x: 340, y: 384, width: 780, height: 105 },
-      });
-      count++;
-      await page.screenshot({
-        path: `screenshots/${name}s/${name}${count}.png`,
-        clip: { x: 340, y: 484, width: 780, height: 105 },
-      });
+      await lastChestsFunc(page, name, count, lastChests)
 
       await noChestFunc(name);
 
@@ -429,6 +397,39 @@ async function openBanksPageFunc(page, socket) {
   } catch (err) {
     console.log(
       "An error has occured during an execution of open banks page function",
+      err
+    );
+  }
+}
+
+async function lastChestsFunc(page, name, count, lastChests) {
+  try {
+    let x = 0
+    if (lastChests) {
+      x = x + 5
+    }
+    await page.screenshot({
+      path: `screenshots/${name}s/${name}${count}.png`,
+      clip: { x: 382, y: 198 - x, width: 701, height: 80 },
+    });
+    count++;
+    await page.screenshot({
+      path: `screenshots/${name}s/${name}${count}.png`,
+      clip: { x: 382, y: 298 - x, width: 701, height: 80 },
+    });
+    count++;
+    await page.screenshot({
+      path: `screenshots/${name}s/${name}${count}.png`,
+      clip: { x: 382, y: 398 - x, width: 701, height: 80 },
+    });
+    count++;
+    await page.screenshot({
+      path: `screenshots/${name}s/${name}${count}.png`,
+      clip: { x: 382, y: 498 - x, width: 701, height: 80 },
+    });
+  } catch (err) {
+    console.log(
+      "An error has occured during an execution of last chests function",
       err
     );
   }
