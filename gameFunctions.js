@@ -95,7 +95,7 @@ async function secondProgressFunc(page) {
 
     const diff = new PNG({ width, height });
 
-    const diffPixels = await pixelmatch(
+    const diffPixels = pixelmatch(
       secondprogress.data,
       isloaded.data,
       diff.data,
@@ -139,7 +139,7 @@ async function chestScanFunc(page, count, name) {
 
     const scrollDiff = new PNG({ width, height });
 
-    const scrollDiffPixels = await pixelmatch(
+    const scrollDiffPixels = pixelmatch(
       scroll.data,
       scrollFinished.data,
       scrollDiff.data,
@@ -198,7 +198,7 @@ async function clanCheckFunc(page) {
 
     const clanDiff = new PNG({ width, height });
 
-    const clanDiffPixels = await pixelmatch(
+    const clanDiffPixels = pixelmatch(
       clan.data,
       hopefullyClan.data,
       clanDiff.data,
@@ -237,7 +237,7 @@ async function isEmptyFunc(page) {
 
   const diff = new PNG({ width, height });
 
-  const diffPixels = await pixelmatch(
+  const diffPixels = pixelmatch(
     isEmptyList.data,
     idealList.data,
     diff.data,
@@ -275,7 +275,7 @@ async function noScrollFunc(page, count, name) {
 
     const diff = new PNG({ width, height });
 
-    const diffPixels = await pixelmatch(
+    const diffPixels = pixelmatch(
       noScroll.data,
       idealScroll.data,
       diff.data,
@@ -337,7 +337,7 @@ async function noChestFunc(name) {
 
       const diff = new PNG({ width, height });
 
-      const diffPixels = await pixelmatch(
+      const diffPixels = pixelmatch(
         noChest.data,
         emptyChest.data,
         diff.data,
