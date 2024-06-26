@@ -127,7 +127,7 @@ async function chestScanFunc(page, count, name) {
     await page.mouse.click(180, 250); // clicks on banks button to prevent afk ad from showing up
     await page.screenshot({
       path: `screenshots/${name}s/${name}${count}.png`,
-      clip: { x: 340, y: 175, width: 780, height: 120 },
+      clip: { x: 382, y: 193, width: 701, height: 80 },
     });
 
     const scroll = PNG.sync.read(fs.readFileSync("screenshots/scroll.png"));
