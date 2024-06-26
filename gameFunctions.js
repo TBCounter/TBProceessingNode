@@ -119,42 +119,42 @@ async function secondProgressFunc(page) {
 
 async function chestScanFunc(page, count, name) {
   try {
-    count++;
-    await page.screenshot({
-      path: "screenshots/scroll.png",
-      clip: { x: 1090, y: 540, width: 30, height: 60 },
-    });
-    await page.mouse.click(180, 250); // clicks on banks button to prevent afk ad from showing up
-    await page.screenshot({
-      path: `screenshots/${name}s/${name}${count}.png`,
-      clip: { x: 382, y: 193, width: 701, height: 80 },
-    });
+    let scrollDiffPixels = 0
+    do {
+      count++;
+      await page.screenshot({
+        path: "screenshots/scroll.png",
+        clip: { x: 1090, y: 540, width: 30, height: 60 },
+      });
+      await page.mouse.click(180, 250); // clicks on banks button to prevent afk ad from showing up
+      await page.screenshot({
+        path: `screenshots/${name}s/${name}${count}.png`,
+        clip: { x: 382, y: 193, width: 701, height: 80 },
+      });
+  
+      const scroll = PNG.sync.read(fs.readFileSync("screenshots/scroll.png"));
+      const scrollFinished = PNG.sync.read(
+        fs.readFileSync("ideal_screenshots/scroll_finished.png")
+      );
+      const { width, height } = scroll;
+  
+      const scrollDiff = new PNG({ width, height });
+  
+      scrollDiffPixels = pixelmatch(
+        scroll.data,
+        scrollFinished.data,
+        scrollDiff.data,
+        width,
+        height,
+        { threshold: 0.1 }
+      );
+        await page.mouse.move(700, 370);
+        await page.mouse.wheel(0, 500);
+        await page.mouse.wheel(0, 500);
 
-    const scroll = PNG.sync.read(fs.readFileSync("screenshots/scroll.png"));
-    const scrollFinished = PNG.sync.read(
-      fs.readFileSync("ideal_screenshots/scroll_finished.png")
-    );
-    const { width, height } = scroll;
+    } while ( scrollDiffPixels > 7 )
 
-    const scrollDiff = new PNG({ width, height });
-
-    const scrollDiffPixels = pixelmatch(
-      scroll.data,
-      scrollFinished.data,
-      scrollDiff.data,
-      width,
-      height,
-      { threshold: 0.1 }
-    );
-
-    if (scrollDiffPixels > 7) {
-      await page.mouse.move(700, 370);
-      await page.mouse.wheel(0, 500);
-      await page.mouse.wheel(0, 500);
-      await chestScanFunc(page, count, name);
-    } else {
       await lastChestsFunc(page, name, count)
-    }
   } catch (err) {
     console.log(
       "An error has occured during an execution of chest scan function",
