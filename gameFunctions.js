@@ -104,7 +104,6 @@ async function secondProgressFunc(page) {
       { threshold: 0.1 }
     );
 
-    fs.writeFileSync("second_diff.png", PNG.sync.write(diff));
     if (diffPixels > 5000) {
       await secondProgressFunc(page);
     }
@@ -147,8 +146,6 @@ async function chestScanFunc(page, count, name) {
       height,
       { threshold: 0.1 }
     );
-
-    fs.writeFileSync("diff_scroll.png", PNG.sync.write(scrollDiff));
 
     if (scrollDiffPixels > 7) {
       await page.mouse.move(700, 370);
@@ -207,8 +204,6 @@ async function clanCheckFunc(page) {
       { threshold: 0.1 }
     );
 
-    fs.writeFileSync("diff_clan.png", PNG.sync.write(clanDiff));
-
     if (clanDiffPixels > 1000) {
       await clanCheckFunc(page);
     }
@@ -246,8 +241,6 @@ async function isEmptyFunc(page) {
     { threshold: 0.1 }
   );
 
-  fs.writeFileSync("diff_list.png", PNG.sync.write(diff));
-
   if (diffPixels < 5000) {
     console.log("empty");
     return true;
@@ -283,8 +276,6 @@ async function noScrollFunc(page, count, name) {
       height,
       { threshold: 0.1 }
     );
-
-    fs.writeFileSync("diff_noscroll.png", PNG.sync.write(diff));
 
     if (diffPixels > 100) {
       console.log("no scroll");
