@@ -3,13 +3,16 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "node ./sockets.js"
+    "start": "node --env-file=.env ./sockets.js",
+    "start:bun": "bun ./sockets.js"
   },
   "dependencies": {
+    "@playwright/test": "^1.44.1",
+    "@sequelize/postgres": "^7.0.0-alpha.40",
+    "pixelmatch": "^5.3.0",
     "sequelize": "^6.37.3",
     "socket.io-client": "^4.7.5",
-    "sqlite3": "^5.1.7",
-    "@playwright/test": "^1.44.1"
+    "sqlite3": "^5.1.7"
   },
   "devDependencies": {
     "@types/node": "^20.13.0"
