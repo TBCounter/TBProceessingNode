@@ -240,7 +240,6 @@ async function noScrollFunc(page, count, name) {
    * TODO Rewrite this function to have ONE PURPOSE
    */
   try {
-    const lastChests = true
     await page.screenshot({
       path: "screenshots/no_scroll.png",
       clip: { x: 1090, y: 160, width: 27, height: 450 },
@@ -267,7 +266,7 @@ async function noScrollFunc(page, count, name) {
       console.log("no scroll");
 
       count++;
-      await lastChestsFunc(page, name, count, lastChests)
+      await lastChestsFunc(page, name, count, true)
 
       await noChestFunc(name);
 
