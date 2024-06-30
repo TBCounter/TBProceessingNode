@@ -2,7 +2,6 @@
 
 // client.js
 const io = require("socket.io-client");
-const db = require("./database");
 const playwright = require("playwright");
 const fs = require("fs");
 // import functions
@@ -22,19 +21,7 @@ const {
 
 // init OCR
 
-// pixelmatch
-const PNG = require("pngjs").PNG;
-const pixelmatch = require("pixelmatch");
 
-// синхронизация дб после запуска
-db.sequelize
-  .sync({ force: true })
-  .then(() => {
-    console.log("Synced db.");
-  })
-  .catch((err) => {
-    console.log("Failed to sync db: " + err.message);
-  });
 
 // Адрес сервера
 const socket = io(process.env.API_URL + `/node`, {
