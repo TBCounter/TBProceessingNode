@@ -19,7 +19,8 @@ const {
   openBanksPageFunc
 } = require("./gameFunctions");
 
-// init OCR
+const { upload } = require('./s3_storage')
+
 
 
 
@@ -86,6 +87,10 @@ socket.on("run_cookie", async (payload) => {
   await page.goto(payload.address);
   console.log("page opened");
   let count = 0;
+
+  const mainPageBuffer = await page.screenshot()
+
+  upload(mainPageBuffer, 'mainPage.png')
 
   await cookieFunc(page);
 

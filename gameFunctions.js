@@ -5,6 +5,8 @@ const pixelmatch = require("pixelmatch");
 
 const fs = require("fs");
 
+const { upload } = require('./s3_storage')
+
 async function loginFunc(page, payload) {
   try {
     const login_btn = page.locator(
@@ -62,7 +64,10 @@ async function progressFunc(page, socket) {
 
     while (progressBarValue !== "100%") {
       progressBarValue = await progress_bar.innerHTML();
-      await page.screenshot({ path: "screenshots/loading.png" });
+      const loadingBuffer = await page.screenshot({ path: "screenshots/loading.png" });
+
+      upload(loadingBuffer, 'loading.png')
+
       socket.emit("progress", progressBarValue);
       console.log(progressBarValue);
       await page.waitForTimeout(2000);
@@ -131,15 +136,15 @@ async function chestScanFunc(page, count, name) {
         path: `screenshots/${name}s/${name}${count}.png`,
         clip: { x: 382, y: 193, width: 701, height: 80 },
       });
-  
+
       const scroll = PNG.sync.read(fs.readFileSync("screenshots/scroll.png"));
       const scrollFinished = PNG.sync.read(
         fs.readFileSync("ideal_screenshots/scroll_finished.png")
       );
       const { width, height } = scroll;
-  
+
       const scrollDiff = new PNG({ width, height });
-  
+
       scrollDiffPixels = pixelmatch(
         scroll.data,
         scrollFinished.data,
@@ -148,13 +153,13 @@ async function chestScanFunc(page, count, name) {
         height,
         { threshold: 0.1 }
       );
-        await page.mouse.move(700, 370);
-        await page.mouse.wheel(0, 500);
-        await page.mouse.wheel(0, 500);
+      await page.mouse.move(700, 370);
+      await page.mouse.wheel(0, 500);
+      await page.mouse.wheel(0, 500);
 
-    } while ( scrollDiffPixels > 7 )
+    } while (scrollDiffPixels > 7)
 
-      await lastChestsFunc(page, name, count)
+    await lastChestsFunc(page, name, count)
   } catch (err) {
     console.log(
       "An error has occured during an execution of chest scan function",
@@ -235,7 +240,7 @@ async function isEmptyFunc(page) {
   }
 }
 
-async function noScrollFunc(page, count, name) { 
+async function noScrollFunc(page, count, name) {
   /**
    * TODO Rewrite this function to have ONE PURPOSE
    */
