@@ -49,8 +49,12 @@ function upload(data, fileName){
     s3.upload(params, (s3Err, data) => {
         if (s3Err) throw s3Err;
         console.log(`File uploaded successfully at ${data.Location}`);
+        // add chest to mongo db HERE, with not-public url
     });
 }
 
+// TODO check downloading from AWS (сделать один раз, проверить что качается и открывается файл)
+// TODO upload chests automatically
+// TODO save chests to mongo with status (UPLOADED), accoount_id, got_at and url
 
 module.exports = { s3, upload }
