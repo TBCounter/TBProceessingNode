@@ -5,7 +5,7 @@ const pixelmatch = require("pixelmatch");
 
 const fs = require("fs");
 
-const { upload } = require('./s3_storage')
+const { upload, s3 } = require("./s3_storage");
 
 async function loginFunc(page, payload) {
   try {
@@ -122,9 +122,13 @@ async function secondProgressFunc(page) {
   }
 }
 
-async function chestScanFunc(page, count, name) {
+async function chestScanFunc(page, count, name, socket) {
   try {
-    let scrollDiffPixels = 0
+    let scrollDiffPixels = 0;
+        socket.on('chestid' , async (chestId, chestname, chestBuffer) => {
+        upload(chestBuffer, `${chestname}_${chestId}.png`);
+    })
+
     do {
       count++;
       await page.screenshot({
@@ -132,10 +136,16 @@ async function chestScanFunc(page, count, name) {
         clip: { x: 1090, y: 540, width: 30, height: 60 },
       });
       await page.mouse.click(180, 250); // clicks on banks button to prevent afk ad from showing up
-      await page.screenshot({
+      let chestBuffer = await page.screenshot({
         path: `screenshots/${name}s/${name}${count}.png`,
         clip: { x: 382, y: 193, width: 701, height: 80 },
       });
+
+      socket.emit(`chest uploaded`, name + count, chestBuffer)
+      
+
+
+      
 
       const scroll = PNG.sync.read(fs.readFileSync("screenshots/scroll.png"));
       const scrollFinished = PNG.sync.read(
@@ -156,10 +166,10 @@ async function chestScanFunc(page, count, name) {
       await page.mouse.move(700, 370);
       await page.mouse.wheel(0, 500);
       await page.mouse.wheel(0, 500);
+    } while (scrollDiffPixels > 7);
 
-    } while (scrollDiffPixels > 7)
-
-    await lastChestsFunc(page, name, count)
+    await lastChestsFunc(page, name, count);
+    await lastChestsUploadFunc(name, count, socket);
   } catch (err) {
     console.log(
       "An error has occured during an execution of chest scan function",
@@ -180,7 +190,9 @@ async function clanCheckFunc(page) {
     });
 
     const clan = PNG.sync.read(fs.readFileSync("screenshots/clan.png"));
-    const hopefullyClan = PNG.sync.read(fs.readFileSync("ideal_screenshots/ideal_clan.png"));
+    const hopefullyClan = PNG.sync.read(
+      fs.readFileSync("ideal_screenshots/ideal_clan.png")
+    );
     const { width, height } = clan;
 
     const clanDiff = new PNG({ width, height });
@@ -217,7 +229,9 @@ async function isEmptyFunc(page) {
   const isEmptyList = PNG.sync.read(
     fs.readFileSync("screenshots/triumphchestlistempty.png")
   );
-  const idealList = PNG.sync.read(fs.readFileSync("ideal_screenshots/ideal_list.png"));
+  const idealList = PNG.sync.read(
+    fs.readFileSync("ideal_screenshots/ideal_list.png")
+  );
   const { width, height } = isEmptyList;
 
   const diff = new PNG({ width, height });
@@ -240,7 +254,7 @@ async function isEmptyFunc(page) {
   }
 }
 
-async function noScrollFunc(page, count, name) {
+async function noScrollFunc(page, count, name, socket) {
   /**
    * TODO Rewrite this function to have ONE PURPOSE
    */
@@ -253,7 +267,9 @@ async function noScrollFunc(page, count, name) {
     const noScroll = PNG.sync.read(
       fs.readFileSync("screenshots/no_scroll.png")
     );
-    const idealScroll = PNG.sync.read(fs.readFileSync("ideal_screenshots/ideal_scroll.png"));
+    const idealScroll = PNG.sync.read(
+      fs.readFileSync("ideal_screenshots/ideal_scroll.png")
+    );
     const { width, height } = noScroll;
 
     const diff = new PNG({ width, height });
@@ -271,9 +287,10 @@ async function noScrollFunc(page, count, name) {
       console.log("no scroll");
 
       count++;
-      await lastChestsFunc(page, name, count, true)
+      await lastChestsFunc(page, name, count, true);
 
       await noChestFunc(name);
+      await lastChestsUploadFunc(name, count, socket)
 
       return true;
     } else {
@@ -295,7 +312,9 @@ async function noChestFunc(name) {
       const noChest = PNG.sync.read(
         fs.readFileSync(`screenshots/${name}s/${name}${n}.png`)
       );
-      const emptyChest = PNG.sync.read(fs.readFileSync("ideal_screenshots/no_chest.png"));
+      const emptyChest = PNG.sync.read(
+        fs.readFileSync("ideal_screenshots/no_chest.png")
+      );
       const { width, height } = noChest;
 
       const diff = new PNG({ width, height });
@@ -331,7 +350,9 @@ async function adSkipFunc(page, socket) {
     });
 
     const cross = PNG.sync.read(fs.readFileSync("screenshots/cross.png"));
-    const idealcross = PNG.sync.read(fs.readFileSync("ideal_screenshots/idealcross.png"));
+    const idealcross = PNG.sync.read(
+      fs.readFileSync("ideal_screenshots/idealcross.png")
+    );
     const { width, height } = cross;
 
     const diff = new PNG({ width, height });
@@ -408,29 +429,53 @@ async function openBanksPageFunc(page, socket) {
 
 async function lastChestsFunc(page, name, count, lastChests) {
   try {
-    let x = 0
+    let x = 0;
     if (lastChests) {
-      x = x + 5
+      x = x + 5;
     }
     await page.screenshot({
       path: `screenshots/${name}s/${name}${count}.png`,
       clip: { x: 382, y: 198 - x, width: 701, height: 80 },
     });
+    
     count++;
     await page.screenshot({
       path: `screenshots/${name}s/${name}${count}.png`,
       clip: { x: 382, y: 298 - x, width: 701, height: 80 },
     });
+
     count++;
     await page.screenshot({
       path: `screenshots/${name}s/${name}${count}.png`,
       clip: { x: 382, y: 398 - x, width: 701, height: 80 },
     });
+
     count++;
     await page.screenshot({
       path: `screenshots/${name}s/${name}${count}.png`,
       clip: { x: 382, y: 498 - x, width: 701, height: 80 },
     });
+
+  } catch (err) {
+    console.log(
+      "An error has occured during an execution of last chests function",
+      err
+    );
+  }
+}
+
+async function lastChestsUploadFunc(name, count, socket) {
+  try {
+    count--
+    for (let n = 1; n < 5; n++) {
+      count++
+      if(fs.existsSync(`screenshots/${name}s/${name}${count}.png`)) {
+        const chestBuffer = fs.readFileSync(`screenshots/${name}s/${name}${count}.png`)
+        socket.emit('chest uploaded', name + count)
+        upload(chestBuffer, `${name}${count}.png`);
+      }
+      
+    }
   } catch (err) {
     console.log(
       "An error has occured during an execution of last chests function",
@@ -450,5 +495,5 @@ module.exports = {
   noScrollFunc,
   noChestFunc,
   adSkipFunc,
-  openBanksPageFunc
+  openBanksPageFunc,
 };
