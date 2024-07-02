@@ -64,9 +64,7 @@ async function progressFunc(page, socket) {
 
     while (progressBarValue !== "100%") {
       progressBarValue = await progress_bar.innerHTML();
-      const loadingBuffer = await page.screenshot({ path: "screenshots/loading.png" });
-
-      upload(loadingBuffer, 'loading.png')
+      await page.screenshot({ path: "screenshots/loading.png" });
 
       socket.emit("progress", progressBarValue);
       console.log(progressBarValue);
@@ -95,7 +93,9 @@ async function secondProgressFunc(page) {
     const secondprogress = PNG.sync.read(
       fs.readFileSync("screenshots/secondprogress.png")
     );
-    const isloaded = PNG.sync.read(fs.readFileSync("ideal_screenshots/isloaded.png"));
+    const isloaded = PNG.sync.read(
+      fs.readFileSync("ideal_screenshots/isloaded.png")
+    );
     const { width, height } = secondprogress;
 
     const diff = new PNG({ width, height });

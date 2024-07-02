@@ -88,9 +88,9 @@ socket.on("run_cookie", async (payload) => {
   console.log("page opened");
   let count = 0;
 
-  const mainPageBuffer = await page.screenshot()
+  //const mainPageBuffer = await page.screenshot()
 
-  upload(mainPageBuffer, 'mainPage.png')
+  //upload(mainPageBuffer, 'mainPage.png')
 
   await cookieFunc(page);
 
@@ -103,7 +103,6 @@ socket.on("run_cookie", async (payload) => {
   await openBanksPageFunc(page, socket);
   //saving avatar
 
-  // if statements and isEmptyFunc was moved out of chestScanFunc due to it's recursive nature. Program would call isEmptyFunc over and over again, therefore causing severe performance issues
 
   let isEmpty = await isEmptyFunc(page);
 
