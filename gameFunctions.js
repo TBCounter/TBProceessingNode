@@ -125,8 +125,9 @@ async function secondProgressFunc(page) {
 async function chestScanFunc(page, count, name, socket) {
   try {
     let scrollDiffPixels = 0;
-        socket.on('chestid' , async (chestId, chestname, chestBuffer) => {
-        upload(chestBuffer, `${chestname}_${chestId}.png`);
+    let ChestIdString = ''
+        socket.on('chestid' , async (chestId) => {
+          ChestIdString = await chestId
     })
 
     do {
@@ -141,8 +142,8 @@ async function chestScanFunc(page, count, name, socket) {
         clip: { x: 382, y: 193, width: 701, height: 80 },
       });
 
-      socket.emit(`chest uploaded`, name + count, chestBuffer)
-      
+      socket.emit(`chest uploaded`, name + count)
+      upload(chestBuffer, `${name + count}_${ChestIdString}.png`);
 
 
       
