@@ -475,15 +475,29 @@ async function lastChestsFunc(page, name, count, lastChests) {
   }
 }
 
-async function lastChestsUploadFunc(name, count, socket) {
+async function lastChestsUploadFunc(name, count) {
   try {
     count--
     for (let n = 1; n < 5; n++) {
       count++
       if (fs.existsSync(`screenshots/${name}s/${name}${count}.png`)) {
         const chestBuffer = fs.readFileSync(`screenshots/${name}s/${name}${count}.png`)
-        socket.emit('chest uploaded', name + count)
-        upload(chestBuffer, `${name}${count}.png`);
+        const response = await fetch('http://localhost:3000/db', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            name: `${name + count}`
+          })
+          })
+    
+          if (!response.ok) {
+            throw new Error("Could not fetch")
+          }
+          const chestid = response.json()
+    
+          upload(chestBuffer, `${name + count}_${await chestid}.png`);
       }
 
     }
