@@ -124,12 +124,7 @@ async function secondProgressFunc(page) {
 
 async function chestScanFunc(page, count, name, socket) {
   try {
-    let scrollDiffPixels = 0;
-    let ChestIdString = ''
-        socket.on('chestid' , async (chestId) => {
-          ChestIdString = await chestId
-    })
-
+    let scrollDiffPixels = 0; 
     do {
       count++;
       await page.screenshot({
@@ -142,8 +137,23 @@ async function chestScanFunc(page, count, name, socket) {
         clip: { x: 382, y: 193, width: 701, height: 80 },
       });
 
-      socket.emit(`chest uploaded`, name + count)
-      upload(chestBuffer, `${name + count}_${ChestIdString}.png`);
+      // rename to actual IP
+      const response = await fetch('http://localhost:3000/db', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        name: `${name + count}`
+      })
+      })
+
+      if (!response.ok) {
+        throw new Error("Could not fetch")
+      }
+      const chestid = response.json()
+
+      upload(chestBuffer, `${name + count}_${await chestid}.png`);
 
 
       
