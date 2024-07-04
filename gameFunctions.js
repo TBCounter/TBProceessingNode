@@ -126,8 +126,8 @@ async function chestScanFunc(page, count, name, socket) {
   try {
     let scrollDiffPixels = 0;
     let ChestIdString = ''
-        socket.on('chestid' , async (chestId) => {
-          ChestIdString = await chestId
+    socket.on('chestid', async (chestId) => {
+      ChestIdString = await chestId
     })
 
     do {
@@ -146,7 +146,7 @@ async function chestScanFunc(page, count, name, socket) {
       upload(chestBuffer, `${name + count}_${ChestIdString}.png`);
 
 
-      
+
 
       const scroll = PNG.sync.read(fs.readFileSync("screenshots/scroll.png"));
       const scrollFinished = PNG.sync.read(
@@ -438,7 +438,7 @@ async function lastChestsFunc(page, name, count, lastChests) {
       path: `screenshots/${name}s/${name}${count}.png`,
       clip: { x: 382, y: 198 - x, width: 701, height: 80 },
     });
-    
+
     count++;
     await page.screenshot({
       path: `screenshots/${name}s/${name}${count}.png`,
@@ -470,12 +470,12 @@ async function lastChestsUploadFunc(name, count, socket) {
     count--
     for (let n = 1; n < 5; n++) {
       count++
-      if(fs.existsSync(`screenshots/${name}s/${name}${count}.png`)) {
+      if (fs.existsSync(`screenshots/${name}s/${name}${count}.png`)) {
         const chestBuffer = fs.readFileSync(`screenshots/${name}s/${name}${count}.png`)
         socket.emit('chest uploaded', name + count)
         upload(chestBuffer, `${name}${count}.png`);
       }
-      
+
     }
   } catch (err) {
     console.log(
