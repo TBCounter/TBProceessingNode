@@ -139,13 +139,7 @@ async function chestScanFunc(page, count, name, socket) {
 
       // rename to actual IP
       const response = await fetch('http://localhost:3000/db', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        name: `${name + count}`
-      })
+      method: 'POST'
       })
 
       if (!response.ok) {
