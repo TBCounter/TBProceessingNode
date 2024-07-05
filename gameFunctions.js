@@ -3,9 +3,9 @@
 const PNG = require("pngjs").PNG;
 const pixelmatch = require("pixelmatch");
 
+const axios = require('axios');
 const fs = require("fs");
 
-const { upload, s3 } = require("./s3_storage");
 
 async function loginFunc(page, payload) {
   try {
@@ -137,20 +137,17 @@ async function chestScanFunc(page, count, name, socket) {
         clip: { x: 382, y: 193, width: 701, height: 80 },
       });
 
-      // rename to actual IP
-      const response = await fetch('http://localhost:3000/db', {
-      method: 'POST'
+      let res = await axios.post(`${process.env.API_URL}/db`)
+      let { uploadLink, chestId } = res.data
+
+      console.log(uploadLink, chestId)
+      await axios.put(uploadLink, chestBuffer, {
+        headers: {
+          'Content-Type': 'image/png'
+        }
       })
 
-      if (!response.ok) {
-        throw new Error("Could not fetch")
-      }
-      const chestid = response.json()
-
-      upload(chestBuffer, `${name + count}_${await chestid}.png`);
-
-
-
+      socket.emit('cheststatus', 'UPLOADED', chestId)
 
       const scroll = PNG.sync.read(fs.readFileSync("screenshots/scroll.png"));
       const scrollFinished = PNG.sync.read(
@@ -476,22 +473,18 @@ async function lastChestsUploadFunc(name, count) {
       count++
       if (fs.existsSync(`screenshots/${name}s/${name}${count}.png`)) {
         const chestBuffer = fs.readFileSync(`screenshots/${name}s/${name}${count}.png`)
-        const response = await fetch('http://localhost:3000/db', {
-          method: 'POST',
+        let res = await axios.post(`${process.env.API_URL}/db`)
+        let { uploadLink, chestId } = res.data
+
+        await axios.put(uploadLink, chestBuffer, {
           headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            name: `${name + count}`
-          })
-          })
-    
-          if (!response.ok) {
-            throw new Error("Could not fetch")
+            'Content-Type': 'image/png'
           }
-          const chestid = response.json()
+        })
+
+      socket.emit('cheststatus', 'UPLOADED', chestId)
     
-          upload(chestBuffer, `${name + count}_${await chestid}.png`);
+          //upload(chestBuffer, `${name + count}_${await chestid}.png`);
       }
 
     }
