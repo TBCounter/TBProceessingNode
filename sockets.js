@@ -19,11 +19,6 @@ const {
   openBanksPageFunc
 } = require("./gameFunctions");
 
-const { upload } = require('./s3_storage')
-
-
-
-
 // Адрес сервера
 const socket = io(process.env.API_URL + `/node`, {
   transports: ["websocket"], // Использование WebSocket транспорта
@@ -88,9 +83,9 @@ socket.on("run_cookie", async (payload) => {
   console.log("page opened");
   let count = 0;
 
-  const mainPageBuffer = await page.screenshot()
+  //const mainPageBuffer = await page.screenshot()
 
-  upload(mainPageBuffer, 'mainPage.png')
+  //upload(mainPageBuffer, 'mainPage.png')
 
   await cookieFunc(page);
 
@@ -103,15 +98,14 @@ socket.on("run_cookie", async (payload) => {
   await openBanksPageFunc(page, socket);
   //saving avatar
 
-  // if statements and isEmptyFunc was moved out of chestScanFunc due to it's recursive nature. Program would call isEmptyFunc over and over again, therefore causing severe performance issues
 
   let isEmpty = await isEmptyFunc(page);
 
   if (!isEmpty) {
-    const noScrollExec = await noScrollFunc(page, count, "triumphchest");
+    const noScrollExec = await noScrollFunc(page, count, "triumphchest", socket);
     console.log(noScrollExec);
     if (!noScrollExec) {
-      await chestScanFunc(page, count, "triumphchest");
+      await chestScanFunc(page, count, "triumphchest", socket);
     }
   }
 
@@ -120,10 +114,10 @@ socket.on("run_cookie", async (payload) => {
   isEmpty = await isEmptyFunc(page);
 
   if (!isEmpty) {
-    const noScrollExec = await noScrollFunc(page, count, "chest");
+    const noScrollExec = await noScrollFunc(page, count, "chest", socket);
     console.log(noScrollExec);
     if (!noScrollExec) {
-      await chestScanFunc(page, count, "chest");
+      await chestScanFunc(page, count, "chest", socket);
     }
   }
 
@@ -134,7 +128,7 @@ socket.on("run_account", async (payload) => {
   // init page
   socket.emit("status", "opening page");
   console.log("run account");
-  const browser = await playwright["chromium"].launch({ headless: process.env.HEADLESS === 'true' });
+  const browser = await playwright["chromium"].launch({ headless: false });
   console.log("browser opened");
   const context = await browser.newContext();
   const page = await context.newPage();
@@ -157,9 +151,9 @@ socket.on("run_account", async (payload) => {
 
   await openBanksPageFunc(page);
 
-  await chestScanFunc(page, count, "triumphchest");
+  await chestScanFunc(page, count, "triumphchest", socket);
 
-  await chestScanFunc(page, count, "chest");
+  await chestScanFunc(page, count, "chest", socket);
 
   await page.waitForTimeout(30000);
 

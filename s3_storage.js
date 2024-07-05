@@ -48,10 +48,31 @@ function upload(data, fileName){
 
     s3.upload(params, (s3Err, data) => {
         if (s3Err) throw s3Err;
+
+        fetchingUrl(data)
         console.log(`File uploaded successfully at ${data.Location}`);
+
+        
         // add chest to mongo db HERE, with not-public url
     });
 }
+
+async function fetchingUrl(data) {
+    const response = await fetch('http://localhost:3000/db/url', {
+        method: 'POST',
+        headers: {
+        'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            url: data.Location
+        })
+        })
+
+        if (!response.ok) {
+        throw new Error("Could not fetch")
+        }
+}
+
 
 // TODO check downloading from AWS (сделать один раз, проверить что качается и открывается файл)
 // TODO upload chests automatically
