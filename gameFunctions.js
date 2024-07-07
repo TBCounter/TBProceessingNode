@@ -124,7 +124,7 @@ async function secondProgressFunc(page) {
 
 async function chestScanFunc(page, count, name, socket) {
   try {
-    let scrollDiffPixels = 0; 
+    let scrollDiffPixels = 0;
     do {
       count++;
       await page.screenshot({
@@ -137,7 +137,7 @@ async function chestScanFunc(page, count, name, socket) {
         clip: { x: 382, y: 193, width: 701, height: 80 },
       });
 
-      let res = await axios.post(`${process.env.API_URL}/db`)
+      let res = await axios.post(`${process.env.API_URL}/db`) // TODO tech debt create dedicated function and create axios api`
       let { uploadLink, chestId } = res.data
 
       console.log(uploadLink, chestId)
@@ -482,9 +482,9 @@ async function lastChestsUploadFunc(name, count) {
           }
         })
 
-      socket.emit('cheststatus', 'UPLOADED', chestId)
-    
-          //upload(chestBuffer, `${name + count}_${await chestid}.png`);
+        socket.emit('cheststatus', 'UPLOADED', chestId)
+
+        //upload(chestBuffer, `${name + count}_${await chestid}.png`);
       }
 
     }
