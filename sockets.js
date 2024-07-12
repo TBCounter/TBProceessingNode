@@ -27,9 +27,6 @@ const socket = io(process.env.API_URL + `/node`, {
 // Событие успешного подключения
 socket.on("connect", () => {
   console.log("Connected to server");
-
-  // Можно отправлять сообщения на сервер
-  socket.emit("status", "ready");
 });
 
 // Событие получения сообщения от сервера
@@ -121,6 +118,7 @@ socket.on("run_cookie", async (payload) => {
     }
   }
 
+  socket.emit('status', 'ready')
   await page.waitForTimeout(30000);
 });
 
@@ -155,6 +153,7 @@ socket.on("run_account", async (payload) => {
 
   await chestScanFunc(page, count, "chest", socket);
 
+  socket.emit('status', 'ready')
   await page.waitForTimeout(30000);
 
   /*  смотреть насколько загрузилась игра и слать статус в WS  (wait until 100%) (+)
