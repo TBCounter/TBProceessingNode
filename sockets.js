@@ -27,9 +27,6 @@ const socket = io(process.env.API_URL + `/node`, {
 // Событие успешного подключения
 socket.on("connect", () => {
   console.log("Connected to server");
-
-  // Можно отправлять сообщения на сервер
-  socket.emit("status", "ready");
 });
 
 // Событие получения сообщения от сервера
