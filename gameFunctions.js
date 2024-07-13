@@ -141,7 +141,7 @@ async function chestScanFunc(page, count, name, socket) {
       let { uploadLink, chestId } = res.data
 
       console.log(uploadLink, chestId)
-      await axios.put(uploadLink, chestBuffer, {
+      await axios.put(uploadLink, chestBuffer, { // TODO remove await check if it works
         headers: {
           'Content-Type': 'image/png'
         }
