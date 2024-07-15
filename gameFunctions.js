@@ -138,9 +138,8 @@ async function chestScanFunc(page, count, name, socket) {
       });
 
       let res = await axios.post(`${process.env.API_URL}/db`)
-      let { uploadLink, chestId } = res.data
+      let { uploadLink, downloadLink, chestId } = res.data
 
-      console.log(uploadLink, chestId)
       await axios.put(uploadLink, chestBuffer, {
         headers: {
           'Content-Type': 'image/png'
@@ -466,7 +465,7 @@ async function lastChestsFunc(page, name, count, lastChests) {
   }
 }
 
-async function lastChestsUploadFunc(name, count) {
+async function lastChestsUploadFunc(name, count, socket) {
   try {
     count--
     for (let n = 1; n < 5; n++) {
@@ -474,13 +473,13 @@ async function lastChestsUploadFunc(name, count) {
       if (fs.existsSync(`screenshots/${name}s/${name}${count}.png`)) {
         const chestBuffer = fs.readFileSync(`screenshots/${name}s/${name}${count}.png`)
         let res = await axios.post(`${process.env.API_URL}/db`)
-        let { uploadLink, chestId } = res.data
+        let { uploadLink, downloadLink, chestId } = res.data
 
-        await axios.put(uploadLink, chestBuffer, {
-          headers: {
-            'Content-Type': 'image/png'
-          }
-        })
+      await axios.put(uploadLink, chestBuffer, {
+        headers: {
+          'Content-Type': 'image/png'
+        }
+      })
 
       socket.emit('cheststatus', 'UPLOADED', chestId)
     
