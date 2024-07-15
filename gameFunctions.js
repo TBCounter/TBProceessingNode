@@ -124,7 +124,7 @@ async function secondProgressFunc(page) {
 
 async function chestScanFunc(page, count, name, socket) {
   try {
-    let scrollDiffPixels = 0;
+    let scrollDiffPixels = 0; 
     do {
       count++;
       await page.screenshot({
@@ -481,9 +481,9 @@ async function lastChestsUploadFunc(name, count, socket) {
         }
       })
 
-        socket.emit('cheststatus', 'UPLOADED', chestId)
-
-        //upload(chestBuffer, `${name + count}_${await chestid}.png`);
+      socket.emit('cheststatus', 'UPLOADED', chestId)
+    
+          //upload(chestBuffer, `${name + count}_${await chestid}.png`);
       }
 
     }
