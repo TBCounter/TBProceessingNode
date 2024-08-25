@@ -141,12 +141,14 @@ async function chestScanFunc(page, count, name, socket) {
       let { uploadLink, downloadLink, chestId } = res.data
 
       await axios.put(uploadLink, chestBuffer, {
+
         headers: {
           'Content-Type': 'image/png'
         }
+      }).then((response) => {
+        console.log('uploaded to S3', response)
+        socket.emit('cheststatus', 'UPLOADED', chestId)
       })
-
-      socket.emit('cheststatus', 'UPLOADED', chestId)
 
       const scroll = PNG.sync.read(fs.readFileSync("screenshots/scroll.png"));
       const scrollFinished = PNG.sync.read(
