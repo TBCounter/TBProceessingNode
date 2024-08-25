@@ -41,8 +41,7 @@ socket.on("disconnect", () => {
 
 // Событие ошибки
 socket.on("connect_error", (error) => {
-  console.log(process.env.API_URL + `/node`);
-  console.error("Connection error:", error);
+  console.error("Connection error:");
 });
 
 socket.on("run_cookie", async (payload) => {

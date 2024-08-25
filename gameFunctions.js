@@ -140,13 +140,11 @@ async function chestScanFunc(page, count, name, socket) {
       let res = await axios.post(`${process.env.API_URL}/db`)
       let { uploadLink, downloadLink, chestId } = res.data
 
-      await axios.put(uploadLink, chestBuffer, {
-
+      axios.put(uploadLink, chestBuffer, {
         headers: {
           'Content-Type': 'image/png'
         }
       }).then((response) => {
-        console.log('uploaded to S3', response)
         socket.emit('cheststatus', 'UPLOADED', chestId)
       })
 
@@ -372,7 +370,7 @@ async function adSkipFunc(page, socket) {
     fs.writeFileSync("difference.png", PNG.sync.write(diff));
 
     if (diffPixels < 100) {
-      console.log(diffPixels);
+      // console.log(diffPixels);
 
       await page.waitForTimeout(2000);
       await page.mouse.click(1244, 52);
