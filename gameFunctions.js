@@ -56,29 +56,24 @@ async function cookieFunc(page) {
 }
 
 async function progressFunc(page, socket) {
-  try {
-    let progressBarValue = "";
-    const progress_bar = await page.locator(
-      "#game_frame > div.webgl-content > div.game-loading-screen > div.game-loading-screen__container.zindex-2 > div.game-loading-indicator > div.game-loading-progress-bar > div.game-loading-progress-bar__progress-percents"
-    );
 
-    while (progressBarValue !== "100%") {
-      progressBarValue = await progress_bar.innerHTML();
-      await page.screenshot({ path: "screenshots/loading.png" });
+  let progressBarValue = "";
+  const progress_bar = await page.locator(
+    "#game_frame > div.webgl-content > div.game-loading-screen > div.game-loading-screen__container.zindex-2 > div.game-loading-indicator > div.game-loading-progress-bar > div.game-loading-progress-bar__progress-percents"
+  );
 
-      socket.emit("progress", progressBarValue);
-      console.log(progressBarValue);
-      await page.waitForTimeout(2000);
-    }
-    console.log("finished");
+  while (progressBarValue !== "100%") {
+    progressBarValue = await progress_bar.innerHTML();
+    await page.screenshot({ path: "screenshots/loading.png" });
 
-    console.log("Progress function executed successfuly");
-  } catch (err) {
-    console.log(
-      "An error has occured during execution of progress function:",
-      err
-    );
+    socket.emit("progress", progressBarValue);
+    console.log(progressBarValue);
+    await page.waitForTimeout(2000);
   }
+  console.log("finished");
+
+  console.log("Progress function executed successfuly");
+  return true
 }
 
 async function secondProgressFunc(page) {
@@ -475,11 +470,11 @@ async function lastChestsUploadFunc(name, count, socket) {
         let res = await axios.post(`${process.env.API_URL}/db`)
         let { uploadLink, downloadLink, chestId } = res.data
 
-      await axios.put(uploadLink, chestBuffer, {
-        headers: {
-          'Content-Type': 'image/png'
-        }
-      })
+        await axios.put(uploadLink, chestBuffer, {
+          headers: {
+            'Content-Type': 'image/png'
+          }
+        })
 
         socket.emit('cheststatus', 'UPLOADED', chestId)
 

@@ -41,8 +41,18 @@ socket.on("disconnect", () => {
 
 // Событие ошибки
 socket.on("connect_error", (error) => {
-  console.error("Connection error:");
+  console.error("Connection error:", error);
+  console.log(process.env.API_URL);
 });
+
+
+async function closeBrowser(browser) {
+  await browser.close().then(() => {
+    console.log("browser closed");
+    socket.emit('status', 'ready')
+  });
+}
+
 
 socket.on("run_cookie", async (payload) => {
   const { cookie } = await payload;
@@ -85,7 +95,20 @@ socket.on("run_cookie", async (payload) => {
 
   await cookieFunc(page);
 
-  await progressFunc(page, socket);
+  const resultProgress = await progressFunc(page, socket).catch(async (err) => {
+    await page.screenshot({ path: "screenshots/error.png" });
+    socket.emit("error", "wrong cookies")
+    console.log(
+      "An error has occured during execution of progress function:",
+      err
+    );
+    await closeBrowser(browser)
+    return false
+  });
+
+  if (!resultProgress) {
+    return
+  }
 
   await secondProgressFunc(page);
 
@@ -117,8 +140,7 @@ socket.on("run_cookie", async (payload) => {
     }
   }
 
-  socket.emit('status', 'ready')
-  await page.waitForTimeout(30000);
+  await closeBrowser(browser)
 });
 
 socket.on("run_account", async (payload) => {
@@ -181,7 +203,5 @@ socket.on("run_account", async (payload) => {
 
   // await page.screenshot({ path: `nodejs_chromium.png`, fullPage: true });
 
-  await browser.close().then(() => {
-    console.log("browser closed");
-  });
+  await closeBrowser(browser)
 });

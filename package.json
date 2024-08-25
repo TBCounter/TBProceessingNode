@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "node --env-file=.env ./sockets.js",
+    "start": "node ./sockets.js",
     "start:bun": "bun ./sockets.js"
   },
   "dependencies": {
