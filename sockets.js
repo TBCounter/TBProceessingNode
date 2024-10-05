@@ -16,7 +16,7 @@ const {
   noScrollFunc,
   noChestFunc,
   adSkipFunc,
-  openBanksPageFunc
+  openBanksPageFunc,
 } = require("./gameFunctions");
 
 // Адрес сервера
@@ -45,14 +45,12 @@ socket.on("connect_error", (error) => {
   console.log(process.env.API_URL);
 });
 
-
 async function closeBrowser(browser) {
   await browser.close().then(() => {
     console.log("browser closed");
-    socket.emit('status', 'ready')
+    socket.emit("status", "ready");
   });
 }
-
 
 socket.on("run_cookie", async (payload) => {
   const { cookie } = await payload;
@@ -79,8 +77,10 @@ socket.on("run_cookie", async (payload) => {
   socket.emit("status", "opening page");
   console.log("run account");
 
-  console.log(process.env.HEADLESS === 'true')
-  const browser = await playwright["chromium"].launch({ headless: process.env.HEADLESS === 'true' });
+  console.log(process.env.HEADLESS === "true");
+  const browser = await playwright["chromium"].launch({
+    headless: process.env.HEADLESS === "true",
+  });
   console.log("browser opened");
   const context = await browser.newContext();
   const page = await context.newPage();
@@ -97,17 +97,17 @@ socket.on("run_cookie", async (payload) => {
 
   const resultProgress = await progressFunc(page, socket).catch(async (err) => {
     await page.screenshot({ path: "screenshots/error.png" });
-    socket.emit("error", "wrong cookies")
+    socket.emit("error", "wrong cookies");
     console.log(
       "An error has occured during execution of progress function:",
       err
     );
-    await closeBrowser(browser)
-    return false
+    await closeBrowser(browser);
+    return false;
   });
 
   if (!resultProgress) {
-    return
+    return;
   }
 
   await secondProgressFunc(page);
@@ -117,11 +117,15 @@ socket.on("run_cookie", async (payload) => {
   await openBanksPageFunc(page, socket);
   //saving avatar
 
-
   let isEmpty = await isEmptyFunc(page);
 
   if (!isEmpty) {
-    const noScrollExec = await noScrollFunc(page, count, "triumphchest", socket);
+    const noScrollExec = await noScrollFunc(
+      page,
+      count,
+      "triumphchest",
+      socket
+    );
     console.log(noScrollExec);
     if (!noScrollExec) {
       await chestScanFunc(page, count, "triumphchest", socket);
@@ -140,7 +144,7 @@ socket.on("run_cookie", async (payload) => {
     }
   }
 
-  await closeBrowser(browser)
+  await closeBrowser(browser);
 });
 
 socket.on("run_account", async (payload) => {
@@ -174,7 +178,7 @@ socket.on("run_account", async (payload) => {
 
   await chestScanFunc(page, count, "chest", socket);
 
-  socket.emit('status', 'ready')
+  socket.emit("status", "ready");
   await page.waitForTimeout(30000);
 
   /*  смотреть насколько загрузилась игра и слать статус в WS  (wait until 100%) (+)
@@ -203,5 +207,5 @@ socket.on("run_account", async (payload) => {
 
   // await page.screenshot({ path: `nodejs_chromium.png`, fullPage: true });
 
-  await closeBrowser(browser)
+  await closeBrowser(browser);
 });
