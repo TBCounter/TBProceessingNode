@@ -117,7 +117,7 @@ async function secondProgressFunc(page) {
   }
 }
 
-async function chestScanFunc(page, count, name, socket) {
+async function chestScanFunc(page, count, name, socket, accId) {
   try {
     let scrollDiffPixels = 0;
     do {
@@ -132,7 +132,7 @@ async function chestScanFunc(page, count, name, socket) {
         clip: { x: 382, y: 193, width: 701, height: 80 },
       });
 
-      let res = await axios.post(`${process.env.API_URL}/db`)
+      let res = await axios.post(`${process.env.API_URL}/db`, {accountId: accId})
       let { uploadLink, downloadLink, chestId } = res.data
 
       axios.put(uploadLink, chestBuffer, {
@@ -165,7 +165,7 @@ async function chestScanFunc(page, count, name, socket) {
     } while (scrollDiffPixels > 7);
 
     await lastChestsFunc(page, name, count);
-    await lastChestsUploadFunc(name, count, socket);
+    await lastChestsUploadFunc(name, count, socket, accId);
   } catch (err) {
     console.log(
       "An error has occured during an execution of chest scan function",
@@ -460,7 +460,7 @@ async function lastChestsFunc(page, name, count, lastChests) {
   }
 }
 
-async function lastChestsUploadFunc(name, count, socket) {
+async function lastChestsUploadFunc(name, count, socket, accId) {
   try {
     count--
     for (let n = 1; n < 5; n++) {

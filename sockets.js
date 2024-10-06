@@ -131,7 +131,7 @@ socket.on("run_cookie", async (payload) => {
     );
     console.log(noScrollExec);
     if (!noScrollExec) {
-      await chestScanFunc(page, count, "triumphchest", socket);
+      await chestScanFunc(page, count, "triumphchest", socket, payload.accountId);
     }
   }
 
@@ -143,7 +143,7 @@ socket.on("run_cookie", async (payload) => {
     const noScrollExec = await noScrollFunc(page, count, "chest", socket);
     console.log(noScrollExec);
     if (!noScrollExec) {
-      await chestScanFunc(page, count, "chest", socket);
+      await chestScanFunc(page, count, "chest", socket, payload.accountId);
     }
   }
 
@@ -177,9 +177,9 @@ socket.on("run_account", async (payload) => {
 
   await openBanksPageFunc(page);
 
-  await chestScanFunc(page, count, "triumphchest", socket);
+  await chestScanFunc(page, count, "triumphchest", socket, payload.accountId);
 
-  await chestScanFunc(page, count, "chest", socket);
+  await chestScanFunc(page, count, "chest", socket, payload.accountId);
 
   socket.emit("status", "ready");
   await page.waitForTimeout(30000);
