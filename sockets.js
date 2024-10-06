@@ -88,7 +88,10 @@ socket.on("run_cookie", async (payload) => {
   const context = await browser.newContext();
   const page = await context.newPage();
   await context.addCookies(Object.values(cookies));
-  await page.goto(payload.address);
+  await page.goto(payload.address).catch((e) => {
+    console.log(e)
+    closeBrowser(browser)
+  });
   console.log("page opened");
   let count = 0;
 
