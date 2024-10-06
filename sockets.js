@@ -150,6 +150,7 @@ socket.on("run_cookie", async (payload) => {
     }
   }
 
+  socket.emit("session_status", uuid, new Date(), "DONE")
   await closeBrowser(browser);
 });
 
