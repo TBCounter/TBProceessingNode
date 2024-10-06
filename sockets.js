@@ -55,7 +55,7 @@ async function closeBrowser(browser) {
 
 socket.on("run_cookie", async (payload) => {
   const uuid = uuidv4()
-  socket.emit("session", uuid, new Date())
+  socket.emit("session", uuid, new Date(), payload.accountId)
   const { cookie } = await payload;
 
   let cookieName = [];
