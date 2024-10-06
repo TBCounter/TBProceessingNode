@@ -3,6 +3,7 @@
 // client.js
 const io = require("socket.io-client");
 const playwright = require("playwright");
+const { v4: uuidv4 } = require('uuid');
 const fs = require("fs");
 // import functions
 const {
@@ -53,6 +54,8 @@ async function closeBrowser(browser) {
 }
 
 socket.on("run_cookie", async (payload) => {
+  const uuid = uuidv4()
+  socket.emit("session", uuid, new Date())
   const { cookie } = await payload;
 
   let cookieName = [];
