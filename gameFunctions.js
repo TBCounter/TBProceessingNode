@@ -55,6 +55,52 @@ async function cookieFunc(page) {
   }
 }
 
+async function preventLogoutFunc(page, browser, uuid, closeBrowser) {
+  try {
+    let prevent = false
+    while (!prevent) {
+      await page.screenshot({
+        path: "screenshots/preventlogout.png",
+        clip: { x: 544, y: 208, width: 180, height: 180 },
+      });
+      
+
+      const preventlogout = PNG.sync.read(
+        fs.readFileSync("screenshots/preventlogout.png")
+      );
+      const idealprevent = PNG.sync.read(
+        fs.readFileSync("ideal_screenshots/idealpreventlogout.png")
+      );
+      const { width, height } = preventlogout;
+    
+      const diff = new PNG({ width, height });
+    
+      const diffPixels = pixelmatch(
+        preventlogout.data,
+        idealprevent.data,
+        diff.data,
+        width,
+        height,
+        { threshold: 0.1 }
+      );
+    
+      if (diffPixels < 50) {
+        console.log("prevent")
+        prevent = true
+      }
+      await page.waitForTimeout(5000);
+
+    }
+    closeBrowser(browser, uuid)
+  } catch (err) {
+    console.log(
+      "An error has occured during execution of prevent logout function:",
+      err
+    );
+  }
+}
+
+
 async function progressFunc(page, socket) {
 
   let progressBarValue = "";
@@ -498,4 +544,5 @@ module.exports = {
   noChestFunc,
   adSkipFunc,
   openBanksPageFunc,
+  preventLogoutFunc
 };

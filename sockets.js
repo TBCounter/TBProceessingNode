@@ -18,6 +18,7 @@ const {
   noChestFunc,
   adSkipFunc,
   openBanksPageFunc,
+  preventLogoutFunc
 } = require("./gameFunctions");
 
 // Адрес сервера
@@ -50,7 +51,7 @@ async function closeBrowser(browser, uuid, status = "ERROR") {
   await browser.close().then(() => {
     console.log("browser closed");
     emitStatus("ready")
-    socket.emit("session_status", uuid, new Date(), status)
+    socket.emit("session_status", {sessionId: uuid, end_time: new Date(), status})
   });
 }
 
@@ -133,6 +134,7 @@ socket.on("run_cookie", async (payload) => {
     closeBrowser(browser, uuid, "ERROR")
   });;
 
+  preventLogoutFunc(page, browser, uuid, closeBrowser)
   await adSkipFunc(page, emitStatus);
 
   await openBanksPageFunc(page, emitStatus);
