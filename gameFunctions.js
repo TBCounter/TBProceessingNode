@@ -58,10 +58,6 @@ async function cookieFunc(page) {
 async function preventLogoutFunc(page) {
   let prevent = false
 
-  while (!prevent) {
-
-    if (!page) return
-
     await page.screenshot({
       path: "screenshots/preventlogout.png",
       clip: { x: 544, y: 208, width: 180, height: 180 },
@@ -91,12 +87,10 @@ async function preventLogoutFunc(page) {
       console.log("prevent")
       prevent = true
     }
-    await page.waitForTimeout(5000);
 
-  }
 
-  throw new Error('reload')
-
+  
+  if (prevent || !page) throw new Error('reload')
 }
 
 
@@ -156,10 +150,15 @@ async function secondProgressFunc(page) {
 
 }
 
-async function chestScanFunc(page, count, name, socket, accId, sId) {
+async function chestScanFunc(page, count, name, socket, accId, sId, browser, closeBrowser) {
   try {
     let scrollDiffPixels = 0;
     do {
+      await preventLogoutFunc(page).catch((e)=>{
+        console.log(e)
+        closeBrowser(browser, sId, "ERROR")
+      })
+
       count++;
       await page.screenshot({
         path: "screenshots/scroll.png",
@@ -198,13 +197,15 @@ async function chestScanFunc(page, count, name, socket, accId, sId) {
         scrollDiff.data,
         width,
         height,
-        { threshold: 0.3 }
+        { threshold: 0.1 }
       );
+    
       await page.mouse.move(700, 370);
       await page.mouse.wheel(0, 500);
       await page.mouse.wheel(0, 500);
-    } while (scrollDiffPixels > 7);
 
+    } while (scrollDiffPixels > 10);
+    
     await lastChestsFunc(page, name, count);
     await lastChestsUploadFunc(name, count, socket, accId, sId);
   } catch (err) {

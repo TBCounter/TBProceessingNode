@@ -134,9 +134,9 @@ socket.on("run_cookie", async (payload) => {
     closeBrowser(browser, uuid, "ERROR")
   });;
 
-  preventLogoutFunc(page).catch(() => {
-    closeBrowser(browser, uuid, "ERROR");
-  })
+  //preventLogoutFunc(page).catch(() => {
+  //  closeBrowser(browser, uuid, "ERROR");
+  //})
   await adSkipFunc(page, emitStatus);
 
   await openBanksPageFunc(page, emitStatus);
@@ -165,7 +165,7 @@ socket.on("run_cookie", async (payload) => {
     const noScrollExec = await noScrollFunc(page, count, "chest", socket);
     console.log(noScrollExec);
     if (!noScrollExec) {
-      await chestScanFunc(page, count, "chest", socket, payload.accountId, uuid);
+      await chestScanFunc(page, count, "chest", socket, payload.accountId, uuid, browser);
     }
   }
 
