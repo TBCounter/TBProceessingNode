@@ -47,10 +47,10 @@ socket.on("connect_error", (error) => {
   console.log(process.env.API_URL);
 });
 
-async function closeBrowser(browser, uuid, emitStatus, status = "ERROR") {
+async function closeBrowser(browser, uuid, status = "ERROR") {
   await browser.close().then(() => {
     console.log("browser closed");
-    emitStatus("ready")
+    socket.emit("status", { sessionId: '', message: 'ready' });
     socket.emit("session_status", { sessionId: uuid, end_time: new Date(), status })
   });
 }
@@ -95,15 +95,15 @@ socket.on("run_cookie", async (payload) => {
   const context = await browser.newContext();
   const page = await context.newPage().catch((e) => {
     console.log(e)
-    closeBrowser(browser, uuid, emitStatus)
+    closeBrowser(browser, uuid)
   });;
   await context.addCookies(Object.values(cookies)).catch((e) => {
     console.log(e)
-    closeBrowser(browser, uuid, emitStatus)
+    closeBrowser(browser, uuid)
   });;
   await page.goto(payload.address).catch((e) => {
     console.log(e)
-    closeBrowser(browser, uuid, emitStatus)
+    closeBrowser(browser, uuid)
   });
   console.log("page opened");
   let count = 0;
@@ -121,7 +121,7 @@ socket.on("run_cookie", async (payload) => {
       "An error has occured during execution of progress function:",
       err
     );
-    await closeBrowser(browser, uuid, emitStatus, "ERROR");
+    await closeBrowser(browser, uuid, "ERROR");
     return false;
   });
 
@@ -131,11 +131,11 @@ socket.on("run_cookie", async (payload) => {
 
   await secondProgressFunc(page).catch((e) => {
     console.log(e)
-    closeBrowser(browser, uuid, emitStatus, "ERROR")
+    closeBrowser(browser, uuid, "ERROR")
   });;
 
   preventLogoutFunc(page).catch(() => {
-    closeBrowser(browser, uuid, emitStatus, "ERROR");
+    closeBrowser(browser, uuid, "ERROR");
   })
   await adSkipFunc(page, emitStatus);
 
@@ -169,7 +169,7 @@ socket.on("run_cookie", async (payload) => {
     }
   }
 
-  await closeBrowser(browser, uuid, emitStatus, "DONE");
+  await closeBrowser(browser, uuid, "DONE");
 });
 
 socket.on("run_account", async (payload) => {
