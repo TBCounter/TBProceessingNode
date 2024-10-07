@@ -332,7 +332,7 @@ async function noChestFunc(name) {
     );
   }
 }
-async function adSkipFunc(page, socket) {
+async function adSkipFunc(page, emitStatus) {
   try {
     await page.screenshot({ path: "screenshots/finished.png" });
     await page.waitForTimeout(2000);
@@ -368,7 +368,7 @@ async function adSkipFunc(page, socket) {
       await page.waitForTimeout(2000);
     }
 
-    socket.emit("status", "game loaded"); // вынести вне функции
+    emitStatus("game loaded")
     await page.screenshot({ path: "screenshots/gameloaded.png" });
     console.log("game loaded");
 
@@ -385,7 +385,7 @@ async function adSkipFunc(page, socket) {
     await page.keyboard.press("Escape");
 
     await page.screenshot({ path: "screenshots/readyforopening.png" });
-    socket.emit("status", "ready for opening"); // вынести вне функции
+    emitStatus("ready for opening");
     console.log("ready for opening");
 
     console.log("Ad skip function executed successfuly");
@@ -397,9 +397,9 @@ async function adSkipFunc(page, socket) {
   }
 }
 
-async function openBanksPageFunc(page, socket) {
+async function openBanksPageFunc(page, emitStatus) {
   try {
-    socket.emit("status", "saving banks"); // вынести вне функции
+    emitStatus("saving banks"); // вынести вне функции
     console.log("saving banks");
 
     await clanCheckFunc(page);

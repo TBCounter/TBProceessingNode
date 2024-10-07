@@ -49,13 +49,18 @@ socket.on("connect_error", (error) => {
 async function closeBrowser(browser, uuid, status = "ERROR") {
   await browser.close().then(() => {
     console.log("browser closed");
-    socket.emit("status", "ready");
+    emitStatus("ready")
     socket.emit("session_status", uuid, new Date(), status)
   });
 }
 
 socket.on("run_cookie", async (payload) => {
   const uuid = uuidv4()
+
+  function emitStatus(message) {
+    socket.emit("status", { sessionId: uuid, message });
+  }
+
   socket.emit("session", uuid, new Date(), payload.accountId)
   const { cookie } = await payload;
 
@@ -78,7 +83,7 @@ socket.on("run_cookie", async (payload) => {
     };
   }
 
-  socket.emit("status", "opening page");
+  emitStatus("opening page")
   console.log("run account");
 
   console.log(process.env.HEADLESS === "true");
@@ -128,9 +133,9 @@ socket.on("run_cookie", async (payload) => {
     closeBrowser(browser, uuid, "ERROR")
   });;
 
-  await adSkipFunc(page, socket);
+  await adSkipFunc(page, emitStatus);
 
-  await openBanksPageFunc(page, socket);
+  await openBanksPageFunc(page, emitStatus);
   //saving avatar
 
   let isEmpty = await isEmptyFunc(page);
@@ -164,7 +169,7 @@ socket.on("run_cookie", async (payload) => {
 });
 
 socket.on("run_account", async (payload) => {
-  socket.emit("status", "error");
+  // emitStatus("error")
   return
   // init page
   socket.emit("status", "opening page");
