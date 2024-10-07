@@ -62,7 +62,7 @@ socket.on("run_cookie", async (payload) => {
     socket.emit("status", { sessionId: uuid, message });
   }
 
-  socket.emit("session", uuid, new Date(), payload.accountId)
+  socket.emit("session", { sessionId: uuid, startTime: new Date(), accountId: payload.accountId })
   const { cookie } = await payload;
 
   let cookieName = [];
@@ -112,7 +112,7 @@ socket.on("run_cookie", async (payload) => {
 
   //upload(mainPageBuffer, 'mainPage.png')
 
-  await cookieFunc(page);
+  cookieFunc(page);
 
   const resultProgress = await progressFunc(page, socket).catch(async (err) => {
     await page.screenshot({ path: "screenshots/error.png" });

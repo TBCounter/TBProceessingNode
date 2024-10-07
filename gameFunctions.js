@@ -198,7 +198,7 @@ async function chestScanFunc(page, count, name, socket, accId, sId) {
         scrollDiff.data,
         width,
         height,
-        { threshold: 0.1 }
+        { threshold: 0.3 }
       );
       await page.mouse.move(700, 370);
       await page.mouse.wheel(0, 500);
