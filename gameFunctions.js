@@ -77,44 +77,38 @@ async function progressFunc(page, socket) {
 }
 
 async function secondProgressFunc(page) {
-  try {
-    await page.waitForTimeout(2000);
+  await page.waitForTimeout(2000);
 
-    await page.screenshot({
-      path: "screenshots/secondprogress.png",
-      clip: { x: 444, y: 48, width: 529, height: 40 },
-    });
+  await page.screenshot({
+    path: "screenshots/secondprogress.png",
+    clip: { x: 444, y: 48, width: 529, height: 40 },
+  });
 
-    const secondprogress = PNG.sync.read(
-      fs.readFileSync("screenshots/secondprogress.png")
-    );
-    const isloaded = PNG.sync.read(
-      fs.readFileSync("ideal_screenshots/isloaded.png")
-    );
-    const { width, height } = secondprogress;
+  const secondprogress = PNG.sync.read(
+    fs.readFileSync("screenshots/secondprogress.png")
+  );
+  const isloaded = PNG.sync.read(
+    fs.readFileSync("ideal_screenshots/isloaded.png")
+  );
+  const { width, height } = secondprogress;
 
-    const diff = new PNG({ width, height });
+  const diff = new PNG({ width, height });
 
-    const diffPixels = pixelmatch(
-      secondprogress.data,
-      isloaded.data,
-      diff.data,
-      width,
-      height,
-      { threshold: 0.1 }
-    );
+  const diffPixels = pixelmatch(
+    secondprogress.data,
+    isloaded.data,
+    diff.data,
+    width,
+    height,
+    { threshold: 0.1 }
+  );
 
-    if (diffPixels > 5000) {
-      await secondProgressFunc(page);
-    }
-
-    console.log("Second progress function executed successfuly");
-  } catch (err) {
-    console.log(
-      "An error has occured during execution of second progress function:",
-      err
-    );
+  if (diffPixels > 5000) {
+    await secondProgressFunc(page);
   }
+
+  console.log("Second progress function executed successfuly");
+
 }
 
 async function chestScanFunc(page, count, name, socket, accId, sId) {
@@ -132,7 +126,7 @@ async function chestScanFunc(page, count, name, socket, accId, sId) {
         clip: { x: 382, y: 193, width: 701, height: 80 },
       });
 
-      let res = await axios.post(`${process.env.API_URL}/db`, {accountId: accId, sessionId: sId})
+      let res = await axios.post(`${process.env.API_URL}/db`, { accountId: accId, sessionId: sId })
       let { uploadLink, downloadLink, chestId } = res.data
 
       axios.put(uploadLink, chestBuffer, {
@@ -141,6 +135,8 @@ async function chestScanFunc(page, count, name, socket, accId, sId) {
         }
       }).then((response) => {
         socket.emit('cheststatus', 'UPLOADED', chestId)
+      }).catch((e) => {
+        console.log(e)
       })
 
       const scroll = PNG.sync.read(fs.readFileSync("screenshots/scroll.png"));

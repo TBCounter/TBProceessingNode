@@ -46,10 +46,11 @@ socket.on("connect_error", (error) => {
   console.log(process.env.API_URL);
 });
 
-async function closeBrowser(browser) {
+async function closeBrowser(browser, uuid, status = "ERROR") {
   await browser.close().then(() => {
     console.log("browser closed");
     socket.emit("status", "ready");
+    socket.emit("session_status", uuid, new Date(), status)
   });
 }
 
@@ -86,11 +87,17 @@ socket.on("run_cookie", async (payload) => {
   });
   console.log("browser opened");
   const context = await browser.newContext();
-  const page = await context.newPage();
-  await context.addCookies(Object.values(cookies));
+  const page = await context.newPage().catch((e) => {
+    console.log(e)
+    closeBrowser(browser, uuid)
+  });;
+  await context.addCookies(Object.values(cookies)).catch((e) => {
+    console.log(e)
+    closeBrowser(browser, uuid)
+  });;
   await page.goto(payload.address).catch((e) => {
     console.log(e)
-    closeBrowser(browser)
+    closeBrowser(browser, uuid)
   });
   console.log("page opened");
   let count = 0;
@@ -108,7 +115,7 @@ socket.on("run_cookie", async (payload) => {
       "An error has occured during execution of progress function:",
       err
     );
-    await closeBrowser(browser);
+    await closeBrowser(browser, uuid, "ERROR");
     return false;
   });
 
@@ -116,7 +123,10 @@ socket.on("run_cookie", async (payload) => {
     return;
   }
 
-  await secondProgressFunc(page);
+  await secondProgressFunc(page).catch((e) => {
+    console.log(e)
+    closeBrowser(browser, uuid, "ERROR")
+  });;
 
   await adSkipFunc(page, socket);
 
@@ -150,11 +160,12 @@ socket.on("run_cookie", async (payload) => {
     }
   }
 
-  socket.emit("session_status", uuid, new Date(), "DONE")
-  await closeBrowser(browser);
+  await closeBrowser(browser, uuid, "DONE");
 });
 
 socket.on("run_account", async (payload) => {
+  socket.emit("status", "error");
+  return
   // init page
   socket.emit("status", "opening page");
   console.log("run account");
@@ -162,7 +173,10 @@ socket.on("run_account", async (payload) => {
   console.log("browser opened");
   const context = await browser.newContext();
   const page = await context.newPage();
-  await page.goto(payload.address);
+  await page.goto(payload.address).catch((e) => {
+    console.log(e)
+    closeBrowser(browser)
+  });;
   console.log("page opened");
 
   await loginFunc(page, payload);
@@ -214,5 +228,5 @@ socket.on("run_account", async (payload) => {
 
   // await page.screenshot({ path: `nodejs_chromium.png`, fullPage: true });
 
-  await closeBrowser(browser);
+  await closeBrowser(browser, "DONE");
 });
