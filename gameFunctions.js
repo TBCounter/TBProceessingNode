@@ -89,6 +89,41 @@ async function preventLogoutFunc(page) {
   if (prevent || !page) throw new Error("reload");
 }
 
+async function preventBadChests(name, count) {
+  const chestBuffer = PNG.sync.read(fs.readFileSync(`screenshots/${name}s/${name}${count}.png`));
+
+
+  const prevent1 = PNG.sync.read(fs.readFileSync("ideal_screenshots/prevent1.png"));
+  const prevent2 = PNG.sync.read(fs.readFileSync("ideal_screenshots/prevent2.png"));
+
+  const {width, height} = prevent1
+  const diff = new PNG({ width, height });
+
+  console.log(chestBuffer.width)
+
+  prevent1DiffPixels = pixelmatch(
+    chestBuffer.data,
+    prevent1.data,
+    diff.data,
+    width,
+    height,
+    { threshold: 0.1 }
+  );
+
+  prevent2DiffPixels = pixelmatch(
+    chestBuffer.data,
+    prevent2.data,
+    diff.data,
+    width,
+    height,
+    { threshold: 0.1 }
+  );
+
+  console.log(prevent1DiffPixels, prevent2DiffPixels)
+
+  if (prevent1DiffPixels < 3000 || prevent1DiffPixels < 3000) throw new Error('reload')
+}
+
 async function progressFunc(page, socket) {
   let progressBarValue = "";
   const progress_bar = await page.locator(
