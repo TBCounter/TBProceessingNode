@@ -3,6 +3,7 @@
 // client.js
 const io = require("socket.io-client");
 const playwright = require("playwright");
+const { v4: uuidv4 } = require("uuid");
 const fs = require("fs");
 // import functions
 const {
@@ -17,6 +18,8 @@ const {
   noChestFunc,
   adSkipFunc,
   openBanksPageFunc,
+  preventLogoutFunc,
+  openChests,
 } = require("./gameFunctions");
 
 // Адрес сервера
@@ -45,15 +48,31 @@ socket.on("connect_error", (error) => {
   console.log(process.env.API_URL);
 });
 
-async function closeBrowser(browser) {
+async function closeBrowser(browser, uuid, status = "ERROR") {
   await browser.close().then(() => {
     console.log("browser closed");
-    socket.emit("status", "ready");
+    socket.emit("status", { sessionId: "", message: "ready" });
+    socket.emit("session_status", {
+      sessionId: uuid,
+      end_time: new Date(),
+      status,
+    });
   });
 }
 
 socket.on("run_cookie", async (payload) => {
-  const { cookie } = await payload;
+  const uuid = uuidv4();
+
+  function emitStatus(message) {
+    socket.emit("status", { sessionId: uuid, message });
+  }
+
+  socket.emit("session", {
+    sessionId: uuid,
+    startTime: new Date(),
+    accountId: payload.accountId,
+  });
+  const { cookie, open } = payload;
 
   let cookieName = [];
   let cookieValue = [];
@@ -74,7 +93,7 @@ socket.on("run_cookie", async (payload) => {
     };
   }
 
-  socket.emit("status", "opening page");
+  emitStatus("opening page");
   console.log("run account");
 
   console.log(process.env.HEADLESS === "true");
@@ -83,9 +102,18 @@ socket.on("run_cookie", async (payload) => {
   });
   console.log("browser opened");
   const context = await browser.newContext();
-  const page = await context.newPage();
-  await context.addCookies(Object.values(cookies));
-  await page.goto(payload.address);
+  const page = await context.newPage().catch((e) => {
+    console.log(e);
+    closeBrowser(browser, uuid);
+  });
+  await context.addCookies(Object.values(cookies)).catch((e) => {
+    console.log(e);
+    closeBrowser(browser, uuid);
+  });
+  await page.goto(payload.address).catch((e) => {
+    console.log(e);
+    closeBrowser(browser, uuid);
+  });
   console.log("page opened");
   let count = 0;
 
@@ -93,7 +121,7 @@ socket.on("run_cookie", async (payload) => {
 
   //upload(mainPageBuffer, 'mainPage.png')
 
-  await cookieFunc(page);
+  cookieFunc(page);
 
   const resultProgress = await progressFunc(page, socket).catch(async (err) => {
     await page.screenshot({ path: "screenshots/error.png" });
@@ -102,7 +130,7 @@ socket.on("run_cookie", async (payload) => {
       "An error has occured during execution of progress function:",
       err
     );
-    await closeBrowser(browser);
+    await closeBrowser(browser, uuid, "ERROR");
     return false;
   });
 
@@ -110,11 +138,17 @@ socket.on("run_cookie", async (payload) => {
     return;
   }
 
-  await secondProgressFunc(page);
+  await secondProgressFunc(page).catch((e) => {
+    console.log(e);
+    closeBrowser(browser, uuid, "ERROR");
+  });
 
-  await adSkipFunc(page, socket);
+  //preventLogoutFunc(page).catch(() => {
+  //  closeBrowser(browser, uuid, "ERROR");
+  //})
+  await adSkipFunc(page, emitStatus);
 
-  await openBanksPageFunc(page, socket);
+  await openBanksPageFunc(page, emitStatus);
   //saving avatar
 
   let isEmpty = await isEmptyFunc(page);
@@ -128,7 +162,16 @@ socket.on("run_cookie", async (payload) => {
     );
     console.log(noScrollExec);
     if (!noScrollExec) {
-      await chestScanFunc(page, count, "triumphchest", socket);
+      await chestScanFunc(
+        page,
+        count,
+        "triumphchest",
+        socket,
+        payload.accountId,
+        uuid,
+        browser,
+        closeBrowser
+      );
     }
   }
 
@@ -140,14 +183,30 @@ socket.on("run_cookie", async (payload) => {
     const noScrollExec = await noScrollFunc(page, count, "chest", socket);
     console.log(noScrollExec);
     if (!noScrollExec) {
-      await chestScanFunc(page, count, "chest", socket);
+      await chestScanFunc(
+        page,
+        count,
+        "chest",
+        socket,
+        payload.accountId,
+        uuid,
+        browser,
+        closeBrowser
+      );
     }
   }
 
-  await closeBrowser(browser);
+  if (open) {
+    console.log("open chests");
+    await openChests(page);
+  }
+
+  await closeBrowser(browser, uuid, "DONE");
 });
 
 socket.on("run_account", async (payload) => {
+  // emitStatus("error")
+  return;
   // init page
   socket.emit("status", "opening page");
   console.log("run account");
@@ -155,7 +214,10 @@ socket.on("run_account", async (payload) => {
   console.log("browser opened");
   const context = await browser.newContext();
   const page = await context.newPage();
-  await page.goto(payload.address);
+  await page.goto(payload.address).catch((e) => {
+    console.log(e);
+    closeBrowser(browser);
+  });
   console.log("page opened");
 
   await loginFunc(page, payload);
@@ -174,9 +236,16 @@ socket.on("run_account", async (payload) => {
 
   await openBanksPageFunc(page);
 
-  await chestScanFunc(page, count, "triumphchest", socket);
+  await chestScanFunc(
+    page,
+    count,
+    "triumphchest",
+    socket,
+    payload.accountId,
+    uuid
+  );
 
-  await chestScanFunc(page, count, "chest", socket);
+  await chestScanFunc(page, count, "chest", socket, payload.accountId, uuid);
 
   socket.emit("status", "ready");
   await page.waitForTimeout(30000);
@@ -207,5 +276,5 @@ socket.on("run_account", async (payload) => {
 
   // await page.screenshot({ path: `nodejs_chromium.png`, fullPage: true });
 
-  await closeBrowser(browser);
+  await closeBrowser(browser, "DONE");
 });
