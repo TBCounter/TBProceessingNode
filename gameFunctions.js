@@ -538,6 +538,13 @@ async function lastChestsFunc(page, name, count, lastChests) {
       path: `screenshots/${name}s/${name}${count}.png`,
       clip: { x: 382, y: 498 - x, width: 701, height: 80 },
     });
+    await page.mouse.click(1040, 630);
+    await page.waitForTimeout(1000);
+    await page.mouse.click(1040, 630);
+    await page.waitForTimeout(1000);
+    await page.mouse.click(1040, 630);
+    await page.waitForTimeout(1000);
+    await page.mouse.click(1040, 630);
   } catch (err) {
     console.log(
       "An error has occured during an execution of last chests function",
