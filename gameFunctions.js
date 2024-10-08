@@ -89,6 +89,41 @@ async function preventLogoutFunc(page) {
   if (prevent || !page) throw new Error("reload");
 }
 
+async function preventBadChests(name, count) {
+  const chestBuffer = PNG.sync.read(fs.readFileSync(`screenshots/${name}s/${name}${count}.png`));
+
+
+  const prevent1 = PNG.sync.read(fs.readFileSync("ideal_screenshots/prevent1.png"));
+  const prevent2 = PNG.sync.read(fs.readFileSync("ideal_screenshots/prevent2.png"));
+
+  const {width, height} = prevent1
+  const diff = new PNG({ width, height });
+
+  console.log(chestBuffer.width)
+
+  prevent1DiffPixels = pixelmatch(
+    chestBuffer.data,
+    prevent1.data,
+    diff.data,
+    width,
+    height,
+    { threshold: 0.1 }
+  );
+
+  prevent2DiffPixels = pixelmatch(
+    chestBuffer.data,
+    prevent2.data,
+    diff.data,
+    width,
+    height,
+    { threshold: 0.1 }
+  );
+
+  console.log(prevent1DiffPixels, prevent2DiffPixels)
+
+  if (prevent1DiffPixels < 3000 || prevent1DiffPixels < 3000) throw new Error('reload')
+}
+
 async function progressFunc(page, socket) {
   let progressBarValue = "";
   const progress_bar = await page.locator(
@@ -114,7 +149,7 @@ async function secondProgressFunc(page) {
 
   await page.screenshot({
     path: "screenshots/secondprogress.png",
-    clip: { x: 444, y: 48, width: 529, height: 40 },
+    clip: { x: 444, y: 58, width: 529, height: 40 },
   });
 
   const secondprogress = PNG.sync.read(
@@ -164,13 +199,16 @@ async function chestScanFunc(
       count++;
       await page.screenshot({
         path: "screenshots/scroll.png",
-        clip: { x: 1090, y: 540, width: 30, height: 60 },
+        clip: { x: 1090, y: 540, width: 25, height: 60 },
       });
       await page.mouse.click(180, 250); // clicks on banks button to prevent afk ad from showing up
       let chestBuffer = await page.screenshot({
         path: `screenshots/${name}s/${name}${count}.png`,
         clip: { x: 382, y: 193, width: 701, height: 80 },
       });
+      console.log(name + count)
+
+      await preventBadChests(name, count)
 
       let res = await axios.post(`${process.env.API_URL}/db`, {
         accountId: accId,
@@ -500,6 +538,13 @@ async function lastChestsFunc(page, name, count, lastChests) {
       path: `screenshots/${name}s/${name}${count}.png`,
       clip: { x: 382, y: 498 - x, width: 701, height: 80 },
     });
+    await page.mouse.click(1040, 630);
+    await page.waitForTimeout(1000);
+    await page.mouse.click(1040, 630);
+    await page.waitForTimeout(1000);
+    await page.mouse.click(1040, 630);
+    await page.waitForTimeout(1000);
+    await page.mouse.click(1040, 630);
   } catch (err) {
     console.log(
       "An error has occured during an execution of last chests function",
