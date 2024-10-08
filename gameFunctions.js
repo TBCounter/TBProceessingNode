@@ -3,9 +3,8 @@
 const PNG = require("pngjs").PNG;
 const pixelmatch = require("pixelmatch");
 
-const axios = require('axios');
+const axios = require("axios");
 const fs = require("fs");
-
 
 async function loginFunc(page, payload) {
   try {
@@ -56,46 +55,41 @@ async function cookieFunc(page) {
 }
 
 async function preventLogoutFunc(page) {
-  let prevent = false
+  let prevent = false;
 
-    await page.screenshot({
-      path: "screenshots/preventlogout.png",
-      clip: { x: 544, y: 208, width: 180, height: 180 },
-    });
+  await page.screenshot({
+    path: "screenshots/preventlogout.png",
+    clip: { x: 544, y: 208, width: 180, height: 180 },
+  });
 
+  const preventlogout = PNG.sync.read(
+    fs.readFileSync("screenshots/preventlogout.png")
+  );
+  const idealprevent = PNG.sync.read(
+    fs.readFileSync("ideal_screenshots/idealpreventlogout.png")
+  );
+  const { width, height } = preventlogout;
 
-    const preventlogout = PNG.sync.read(
-      fs.readFileSync("screenshots/preventlogout.png")
-    );
-    const idealprevent = PNG.sync.read(
-      fs.readFileSync("ideal_screenshots/idealpreventlogout.png")
-    );
-    const { width, height } = preventlogout;
+  const diff = new PNG({ width, height });
 
-    const diff = new PNG({ width, height });
+  const diffPixels = pixelmatch(
+    preventlogout.data,
+    idealprevent.data,
+    diff.data,
+    width,
+    height,
+    { threshold: 0.1 }
+  );
 
-    const diffPixels = pixelmatch(
-      preventlogout.data,
-      idealprevent.data,
-      diff.data,
-      width,
-      height,
-      { threshold: 0.1 }
-    );
+  if (diffPixels < 50) {
+    console.log("prevent");
+    prevent = true;
+  }
 
-    if (diffPixels < 50) {
-      console.log("prevent")
-      prevent = true
-    }
-
-
-  
-  if (prevent || !page) throw new Error('reload')
+  if (prevent || !page) throw new Error("reload");
 }
 
-
 async function progressFunc(page, socket) {
-
   let progressBarValue = "";
   const progress_bar = await page.locator(
     "#game_frame > div.webgl-content > div.game-loading-screen > div.game-loading-screen__container.zindex-2 > div.game-loading-indicator > div.game-loading-progress-bar > div.game-loading-progress-bar__progress-percents"
@@ -112,7 +106,7 @@ async function progressFunc(page, socket) {
   console.log("finished");
 
   console.log("Progress function executed successfuly");
-  return true
+  return true;
 }
 
 async function secondProgressFunc(page) {
@@ -147,17 +141,25 @@ async function secondProgressFunc(page) {
   }
 
   console.log("Second progress function executed successfuly");
-
 }
 
-async function chestScanFunc(page, count, name, socket, accId, sId, browser, closeBrowser) {
+async function chestScanFunc(
+  page,
+  count,
+  name,
+  socket,
+  accId,
+  sId,
+  browser,
+  closeBrowser
+) {
   try {
     let scrollDiffPixels = 0;
     do {
-      await preventLogoutFunc(page).catch((e)=>{
-        console.log(e)
-        closeBrowser(browser, sId, "ERROR")
-      })
+      await preventLogoutFunc(page).catch((e) => {
+        console.log(e);
+        closeBrowser(browser, sId, "ERROR");
+      });
 
       count++;
       await page.screenshot({
@@ -170,18 +172,24 @@ async function chestScanFunc(page, count, name, socket, accId, sId, browser, clo
         clip: { x: 382, y: 193, width: 701, height: 80 },
       });
 
-      let res = await axios.post(`${process.env.API_URL}/db`, { accountId: accId, sessionId: sId })
-      let { uploadLink, downloadLink, chestId } = res.data
+      let res = await axios.post(`${process.env.API_URL}/db`, {
+        accountId: accId,
+        sessionId: sId,
+      });
+      let { uploadLink, downloadLink, chestId } = res.data;
 
-      axios.put(uploadLink, chestBuffer, {
-        headers: {
-          'Content-Type': 'image/png'
-        }
-      }).then((response) => {
-        socket.emit('cheststatus', 'UPLOADED', chestId)
-      }).catch((e) => {
-        console.log(e)
-      })
+      axios
+        .put(uploadLink, chestBuffer, {
+          headers: {
+            "Content-Type": "image/png",
+          },
+        })
+        .then((response) => {
+          socket.emit("cheststatus", "UPLOADED", chestId);
+        })
+        .catch((e) => {
+          console.log(e);
+        });
 
       const scroll = PNG.sync.read(fs.readFileSync("screenshots/scroll.png"));
       const scrollFinished = PNG.sync.read(
@@ -199,13 +207,12 @@ async function chestScanFunc(page, count, name, socket, accId, sId, browser, clo
         height,
         { threshold: 0.1 }
       );
-    
+
       await page.mouse.move(700, 370);
       await page.mouse.wheel(0, 500);
       await page.mouse.wheel(0, 500);
-
     } while (scrollDiffPixels > 10);
-    
+
     await lastChestsFunc(page, name, count);
     await lastChestsUploadFunc(name, count, socket, accId, sId);
   } catch (err) {
@@ -328,7 +335,7 @@ async function noScrollFunc(page, count, name, socket) {
       await lastChestsFunc(page, name, count, true);
 
       await noChestFunc(name);
-      await lastChestsUploadFunc(name, count, socket)
+      await lastChestsUploadFunc(name, count, socket);
 
       return true;
     } else {
@@ -414,7 +421,7 @@ async function adSkipFunc(page, emitStatus) {
       await page.waitForTimeout(2000);
     }
 
-    emitStatus("game loaded")
+    emitStatus("game loaded");
     await page.screenshot({ path: "screenshots/gameloaded.png" });
     console.log("game loaded");
 
@@ -493,7 +500,6 @@ async function lastChestsFunc(page, name, count, lastChests) {
       path: `screenshots/${name}s/${name}${count}.png`,
       clip: { x: 382, y: 498 - x, width: 701, height: 80 },
     });
-
   } catch (err) {
     console.log(
       "An error has occured during an execution of last chests function",
@@ -504,25 +510,26 @@ async function lastChestsFunc(page, name, count, lastChests) {
 
 async function lastChestsUploadFunc(name, count, socket, accId, sId) {
   try {
-    count--
+    count--;
     for (let n = 1; n < 5; n++) {
-      count++
+      count++;
       if (fs.existsSync(`screenshots/${name}s/${name}${count}.png`)) {
-        const chestBuffer = fs.readFileSync(`screenshots/${name}s/${name}${count}.png`)
-        let res = await axios.post(`${process.env.API_URL}/db`)
-        let { uploadLink, downloadLink, chestId } = res.data
+        const chestBuffer = fs.readFileSync(
+          `screenshots/${name}s/${name}${count}.png`
+        );
+        let res = await axios.post(`${process.env.API_URL}/db`);
+        let { uploadLink, downloadLink, chestId } = res.data;
 
         await axios.put(uploadLink, chestBuffer, {
           headers: {
-            'Content-Type': 'image/png'
-          }
-        })
+            "Content-Type": "image/png",
+          },
+        });
 
-        socket.emit('cheststatus', 'UPLOADED', chestId)
+        socket.emit("cheststatus", "UPLOADED", chestId);
 
         //upload(chestBuffer, `${name + count}_${await chestid}.png`);
       }
-
     }
   } catch (err) {
     console.log(
@@ -530,6 +537,13 @@ async function lastChestsUploadFunc(name, count, socket, accId, sId) {
       err
     );
   }
+}
+
+async function openChests(page) {
+  await page.screenshot({
+    path: `screenshots/test.png`,
+  });
+  // await page.mouse.click(700, 640);
 }
 
 module.exports = {
@@ -544,5 +558,6 @@ module.exports = {
   noChestFunc,
   adSkipFunc,
   openBanksPageFunc,
-  preventLogoutFunc
+  preventLogoutFunc,
+  openChests,
 };
