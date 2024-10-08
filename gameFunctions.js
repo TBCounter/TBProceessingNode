@@ -42,7 +42,9 @@ async function loginFunc(page, payload) {
 async function cookieFunc(page) {
   try {
     await page.waitForTimeout(Math.random() * 1000);
-    const cookie_button = await page.locator("#cky-btn-accept");
+    const cookie_button = await page.locator("#cky-btn-accept").catch(() => {
+      console.log("no cookie button");
+    });
     await cookie_button.click();
 
     console.log("Cookie function executed successfuly");
@@ -90,16 +92,21 @@ async function preventLogoutFunc(page) {
 }
 
 async function preventBadChests(name, count) {
-  const chestBuffer = PNG.sync.read(fs.readFileSync(`screenshots/${name}s/${name}${count}.png`));
+  const chestBuffer = PNG.sync.read(
+    fs.readFileSync(`screenshots/${name}s/${name}${count}.png`)
+  );
 
+  const prevent1 = PNG.sync.read(
+    fs.readFileSync("ideal_screenshots/prevent1.png")
+  );
+  const prevent2 = PNG.sync.read(
+    fs.readFileSync("ideal_screenshots/prevent2.png")
+  );
 
-  const prevent1 = PNG.sync.read(fs.readFileSync("ideal_screenshots/prevent1.png"));
-  const prevent2 = PNG.sync.read(fs.readFileSync("ideal_screenshots/prevent2.png"));
-
-  const {width, height} = prevent1
+  const { width, height } = prevent1;
   const diff = new PNG({ width, height });
 
-  console.log(chestBuffer.width)
+  console.log(chestBuffer.width);
 
   prevent1DiffPixels = pixelmatch(
     chestBuffer.data,
@@ -119,9 +126,10 @@ async function preventBadChests(name, count) {
     { threshold: 0.1 }
   );
 
-  console.log(prevent1DiffPixels, prevent2DiffPixels)
+  console.log(prevent1DiffPixels, prevent2DiffPixels);
 
-  if (prevent1DiffPixels < 3000 || prevent1DiffPixels < 3000) throw new Error('reload')
+  if (prevent1DiffPixels < 3000 || prevent1DiffPixels < 3000)
+    throw new Error("reload");
 }
 
 async function progressFunc(page, socket) {
@@ -206,9 +214,9 @@ async function chestScanFunc(
         path: `screenshots/${name}s/${name}${count}.png`,
         clip: { x: 382, y: 193, width: 701, height: 80 },
       });
-      console.log(name + count)
+      console.log(name + count);
 
-      await preventBadChests(name, count)
+      await preventBadChests(name, count);
 
       let res = await axios.post(`${process.env.API_URL}/db`, {
         accountId: accId,
