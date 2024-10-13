@@ -42,9 +42,7 @@ async function loginFunc(page, payload) {
 async function cookieFunc(page) {
   try {
     await page.waitForTimeout(Math.random() * 1000);
-    const cookie_button = await page.locator("#cky-btn-accept").catch(() => {
-      console.log("no cookie button");
-    });
+    const cookie_button = await page.locator("#cky-btn-accept")
     await cookie_button.click();
 
     console.log("Cookie function executed successfuly");

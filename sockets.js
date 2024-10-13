@@ -25,12 +25,18 @@ const {
 // Адрес сервера
 const socket = io(process.env.API_URL + `/node`, {
   transports: ["websocket"], // Использование WebSocket транспорта
+  pingTimeout: 60000, // Время ожидания пинга в миллисекундах (60 секунд)
+  pingInterval: 25000, // Интервал между пингами (25 секунд)
 });
 
 // Событие успешного подключения
 socket.on("connect", () => {
   console.log("Connected to server");
 });
+
+setInterval(() => {
+  console.log("Socket connected:", socket.connected);
+}, 10000); // Проверять каждые 10 секунд
 
 // Событие получения сообщения от сервера
 socket.on("message", (data) => {
@@ -49,10 +55,10 @@ socket.on("connect_error", (error) => {
 });
 
 async function closeBrowser(browser, uuid, status = "ERROR") {
-  await browser.close().then(() => {
+  await browser.close().then(async () => {
     console.log("browser closed");
     socket.emit("status", { sessionId: "", message: "ready" });
-    socket.emit("session_status", {
+    await socket.emit("session_status", {
       sessionId: uuid,
       end_time: new Date(),
       status,
@@ -102,45 +108,41 @@ socket.on("run_cookie", async (payload) => {
   });
   console.log("browser opened");
   const context = await browser.newContext();
-  const page = await context.newPage().catch((e) => {
+  const page = await context.newPage().catch(async (e) => {
     console.log(e);
-    closeBrowser(browser, uuid);
+    await closeBrowser(browser, uuid);
   });
-  await context.addCookies(Object.values(cookies)).catch((e) => {
+  await context.addCookies(Object.values(cookies)).catch(async (e) => {
     console.log(e);
-    closeBrowser(browser, uuid);
+    await closeBrowser(browser, uuid);
   });
-  await page.goto(payload.address).catch((e) => {
+  await page.goto(payload.address, { timeoout: 60000 }).catch(async (e) => {
     console.log(e);
-    closeBrowser(browser, uuid);
+    await closeBrowser(browser, uuid);
   });
   console.log("page opened");
-  let count = 0;
 
   //const mainPageBuffer = await page.screenshot()
 
   //upload(mainPageBuffer, 'mainPage.png')
 
-  cookieFunc(page);
-
+  // cookieFunc(page);
+  
   const resultProgress = await progressFunc(page, socket).catch(async (err) => {
     await page.screenshot({ path: "screenshots/error.png" });
-    socket.emit("error", "wrong cookies");
-    console.log(
-      "An error has occured during execution of progress function:",
-      err
-    );
-    await closeBrowser(browser, uuid, "ERROR");
-    return false;
+    // socket.emit("error", "wrong cookies");
+    console.log("no progress! maybe already loaded?", err);
+    // await closeBrowser(browser, uuid, "ERROR");
+    // return false;
   });
 
-  if (!resultProgress) {
-    return;
-  }
+  // if (!resultProgress) {
+  //   return;
+  // }
 
   await secondProgressFunc(page).catch((e) => {
-    console.log(e);
-    closeBrowser(browser, uuid, "ERROR");
+    console.log("no second progress! ", e);
+    // closeBrowser(browser, uuid, "ERROR");
   });
 
   //preventLogoutFunc(page).catch(() => {
@@ -152,6 +154,7 @@ socket.on("run_cookie", async (payload) => {
   //saving avatar
 
   let isEmpty = await isEmptyFunc(page);
+  let count = 0;
 
   if (!isEmpty) {
     const noScrollExec = await noScrollFunc(
