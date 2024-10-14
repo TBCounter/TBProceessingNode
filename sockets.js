@@ -115,14 +115,14 @@ socket.on("run_cookie", async (payload) => {
   page.goto(payload.address).catch((e) => {
     console.log(e);
   });
-  const timeout = setTimeout(()=>{
-    closeBrowser(browser,uuid)
+  const timeout = setTimeout(() => {
+    closeBrowser(browser, uuid)
   }, 30000)
 
-  const interval = setInterval(async ()=>{
+  const interval = setInterval(async () => {
     if (await gameLoaded(page) || await gameLoaded2(page)) {
       console.log("game is loading")
-      socket.emit("game is loading")
+      socket.emit("game is loading", cookie)
       clearInterval(interval)
       clearTimeout(timeout)
       return
