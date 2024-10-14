@@ -592,6 +592,66 @@ async function lastChestsUploadFunc(name, count, socket, accId, sId) {
   }
 }
 
+async function gameLoaded(page) {
+  await page.screenshot({
+    path: "screenshots/loadingcheck.png",
+    clip: { x: 544, y: 208, width: 180, height: 180 },
+  });
+
+  const loadingCheck = PNG.sync.read(
+    fs.readFileSync("screenshots/loadingcheck.png")
+  );
+  const idealprevent = PNG.sync.read(
+    fs.readFileSync("ideal_screenshots/idealpreventlogout.png")
+  );
+  const { width, height } = loadingCheck;
+
+  const diff = new PNG({ width, height });
+
+  const diffPixels = pixelmatch(
+    loadingCheck.data,
+    idealprevent.data,
+    diff.data,
+    width,
+    height,
+    { threshold: 0.1 }
+  );
+
+  if (diffPixels < 50) {
+    return true
+  } else return false
+}
+
+async function gameLoaded2(page) {
+  await page.screenshot({
+    path: "screenshots/cross.png",
+    clip: { x: 1244, y: 52, width: 30, height: 28 },
+  });
+
+  const loadingCheck = PNG.sync.read(
+    fs.readFileSync("screenshots/cross.png")
+  );
+  const idealcross = PNG.sync.read(
+    fs.readFileSync("ideal_screenshots/idealcross.png")
+  );
+  const { width, height } = loadingCheck;
+
+  const diff = new PNG({ width, height });
+
+  const diffPixels = pixelmatch(
+    loadingCheck.data,
+    idealcross.data,
+    diff.data,
+    width,
+    height,
+    { threshold: 0.1 }
+  );
+
+  if (diffPixels < 50) {
+    return true
+  } else return false
+}
+
 async function openChests(page) {
   await page.screenshot({
     path: `screenshots/test.png`,
@@ -613,4 +673,6 @@ module.exports = {
   openBanksPageFunc,
   preventLogoutFunc,
   openChests,
+  gameLoaded,
+  gameLoaded2
 };
