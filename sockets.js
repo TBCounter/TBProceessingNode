@@ -20,6 +20,8 @@ const {
   openBanksPageFunc,
   preventLogoutFunc,
   openChests,
+  gameLoaded,
+  gameLoaded2,
 } = require("./gameFunctions");
 
 // Адрес сервера
@@ -59,6 +61,30 @@ async function closeBrowser(browser, uuid, status = "ERROR") {
     });
   });
 }
+
+
+async function checkGameLoadOrTimeout(page, browser, uuid) {
+  console.log("page opened");
+
+  return new Promise((resolve, reject) => {
+    const timeout = setTimeout(() => {
+      console.log("Timeout reached. Closing browser...");
+      closeBrowser(browser, uuid);
+      reject(new Error("Timeout reached"));
+    }, 30000);
+
+    const interval = setInterval(async () => {
+      if ((await gameLoaded(page)) || (await gameLoaded2(page))) {
+        console.log("Game is loading");
+        socket.emit("game is loading");
+        clearInterval(interval);
+        clearTimeout(timeout);
+        resolve(); // завершить промис успешно
+      }
+    }, 3000);
+  });
+}
+
 
 socket.on("run_cookie", async (payload) => {
   const uuid = uuidv4();
@@ -110,10 +136,13 @@ socket.on("run_cookie", async (payload) => {
     console.log(e);
     closeBrowser(browser, uuid);
   });
-  await page.goto(payload.address).catch((e) => {
+  page.goto(payload.address).catch((e) => {
     console.log(e);
-    closeBrowser(browser, uuid);
   });
+
+
+  await checkGameLoadOrTimeout(page, browser, uuid)
+
   console.log("page opened");
   let count = 0;
 
