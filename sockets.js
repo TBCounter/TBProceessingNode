@@ -27,6 +27,8 @@ const {
 // Адрес сервера
 const socket = io(process.env.API_URL + `/node`, {
   transports: ["websocket"], // Использование WebSocket транспорта
+  pingTimeout: 60000, // Время ожидания пинга в миллисекундах (60 секунд)
+  pingInterval: 25000, // Интервал между пингами (25 секунд)
 });
 
 // Событие успешного подключения
