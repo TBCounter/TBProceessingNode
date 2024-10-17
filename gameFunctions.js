@@ -198,13 +198,20 @@ async function chestScanFunc(
 ) {
   try {
     let scrollDiffPixels = 0;
+    let preventLogoutCooldown = 20
     do {
-      await preventLogoutFunc(page).catch((e) => {
-        console.log(e);
-        closeBrowser(browser, sId, "ERROR");
-      });
+      preventLogoutCooldown--
+      if (!preventLogoutCooldown) {
+        await preventLogoutFunc(page).catch((e) => {
+          console.log(e);
+          closeBrowser(browser, sId, "ERROR");
+        });
+        preventLogoutCooldown = 30
+      }
+
 
       count++;
+      
       await page.screenshot({
         path: "screenshots/scroll.png",
         clip: { x: 1090, y: 540, width: 25, height: 60 },
@@ -216,7 +223,7 @@ async function chestScanFunc(
       });
       console.log(name + count);
 
-      await preventBadChests(name, count);
+      //await preventBadChests(name, count);
 
       let res = await axios.post(`${process.env.API_URL}/db`, {
         accountId: accId,
