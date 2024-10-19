@@ -130,6 +130,7 @@ socket.on("run_cookie", async (payload) => {
   });
   console.log("browser opened");
   const context = await browser.newContext();
+  context.setDefaultTimeout(500000)
   const page = await context.newPage().catch((e) => {
     console.log(e);
     closeBrowser(browser, uuid);
