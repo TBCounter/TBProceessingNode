@@ -236,6 +236,7 @@ async function chestScanFunc(
           headers: {
             "Content-Type": "image/png",
           },
+          timeout: 300000
         })
         .then((response) => {
           socket.emit("cheststatus", "UPLOADED", chestId);
