@@ -198,20 +198,19 @@ async function chestScanFunc(
 ) {
   try {
     let scrollDiffPixels = 0;
-    let preventLogoutCooldown = 20
+    let preventLogoutCooldown = 20;
     do {
-      preventLogoutCooldown--
+      preventLogoutCooldown--;
       if (!preventLogoutCooldown) {
         await preventLogoutFunc(page).catch((e) => {
           console.log(e);
           closeBrowser(browser, sId, "ERROR");
         });
-        preventLogoutCooldown = 30
+        preventLogoutCooldown = 30;
       }
 
-
       count++;
-      
+
       await page.screenshot({
         path: "screenshots/scroll.png",
         clip: { x: 1090, y: 540, width: 25, height: 60 },
@@ -385,7 +384,12 @@ async function noScrollFunc(page, count, name, socket) {
       console.log("no scroll");
 
       count++;
-      await lastChestsFunc(page, name, count, true);
+      await lastChestsFunc(page, name, count, true).catch((err) => {
+        console.log(
+          "An error has occured during an execution of last chests function",
+          err
+        );
+      });
 
       await noChestFunc(name);
       await lastChestsUploadFunc(name, count, socket);
@@ -526,46 +530,32 @@ async function openBanksPageFunc(page, emitStatus) {
 }
 
 async function lastChestsFunc(page, name, count, lastChests) {
-  try {
-    let x = 0;
-    if (lastChests) {
-      x = x + 5;
-    }
-    await page.screenshot({
-      path: `screenshots/${name}s/${name}${count}.png`,
-      clip: { x: 382, y: 198 - x, width: 701, height: 80 },
-    });
-
-    count++;
-    await page.screenshot({
-      path: `screenshots/${name}s/${name}${count}.png`,
-      clip: { x: 382, y: 298 - x, width: 701, height: 80 },
-    });
-
-    count++;
-    await page.screenshot({
-      path: `screenshots/${name}s/${name}${count}.png`,
-      clip: { x: 382, y: 398 - x, width: 701, height: 80 },
-    });
-
-    count++;
-    await page.screenshot({
-      path: `screenshots/${name}s/${name}${count}.png`,
-      clip: { x: 382, y: 498 - x, width: 701, height: 80 },
-    });
-    await page.mouse.click(1040, 630);
-    await page.waitForTimeout(1000);
-    await page.mouse.click(1040, 630);
-    await page.waitForTimeout(1000);
-    await page.mouse.click(1040, 630);
-    await page.waitForTimeout(1000);
-    await page.mouse.click(1040, 630);
-  } catch (err) {
-    console.log(
-      "An error has occured during an execution of last chests function",
-      err
-    );
+  let x = 0;
+  if (lastChests) {
+    x = x + 5;
   }
+  await page.screenshot({
+    path: `screenshots/${name}s/${name}${count}.png`,
+    clip: { x: 382, y: 198 - x, width: 701, height: 80 },
+  });
+
+  count++;
+  await page.screenshot({
+    path: `screenshots/${name}s/${name}${count}.png`,
+    clip: { x: 382, y: 298 - x, width: 701, height: 80 },
+  });
+
+  count++;
+  await page.screenshot({
+    path: `screenshots/${name}s/${name}${count}.png`,
+    clip: { x: 382, y: 398 - x, width: 701, height: 80 },
+  });
+
+  count++;
+  await page.screenshot({
+    path: `screenshots/${name}s/${name}${count}.png`,
+    clip: { x: 382, y: 498 - x, width: 701, height: 80 },
+  });
 }
 
 async function lastChestsUploadFunc(name, count, socket, accId, sId) {
@@ -625,8 +615,8 @@ async function gameLoaded(page) {
   );
 
   if (diffPixels < 50) {
-    return true
-  } else return false
+    return true;
+  } else return false;
 }
 
 async function gameLoaded2(page) {
@@ -635,9 +625,7 @@ async function gameLoaded2(page) {
     clip: { x: 1244, y: 52, width: 30, height: 28 },
   });
 
-  const loadingCheck = PNG.sync.read(
-    fs.readFileSync("screenshots/cross.png")
-  );
+  const loadingCheck = PNG.sync.read(fs.readFileSync("screenshots/cross.png"));
   const idealcross = PNG.sync.read(
     fs.readFileSync("ideal_screenshots/idealcross.png")
   );
@@ -655,11 +643,18 @@ async function gameLoaded2(page) {
   );
 
   if (diffPixels < 50) {
-    return true
-  } else return false
+    return true;
+  } else return false;
 }
 
 async function openChests(page) {
+  await page.mouse.click(1040, 630);
+  await page.waitForTimeout(1000);
+  await page.mouse.click(1040, 630);
+  await page.waitForTimeout(1000);
+  await page.mouse.click(1040, 630);
+  await page.waitForTimeout(1000);
+  await page.mouse.click(1040, 630);
   await page.screenshot({
     path: `screenshots/test.png`,
   });
@@ -681,5 +676,5 @@ module.exports = {
   preventLogoutFunc,
   openChests,
   gameLoaded,
-  gameLoaded2
+  gameLoaded2,
 };
