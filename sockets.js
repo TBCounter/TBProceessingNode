@@ -52,6 +52,11 @@ socket.on("connect_error", (error) => {
   console.log(process.env.API_URL);
 });
 
+function logMemoryUsage() {
+  const used = process.memoryUsage();
+  console.log(`Memory Usage: RSS: ${used.rss}, Heap Total: ${used.heapTotal}, Heap Used: ${used.heapUsed}`);
+}
+
 async function closeBrowser(browser, uuid, status = "ERROR") {
   await browser.close().then(() => {
     console.log("browser closed");
@@ -94,6 +99,10 @@ socket.on("run_cookie", async (payload) => {
   function emitStatus(message) {
     socket.emit("status", { sessionId: uuid, message });
   }
+
+  setInterval(()=> {
+    logMemoryUsage()
+  }, 5000)
 
   socket.emit("session", {
     sessionId: uuid,
@@ -214,6 +223,7 @@ socket.on("run_cookie", async (payload) => {
     const noScrollExec = await noScrollFunc(page, count, "chest", socket);
     console.log(noScrollExec);
     if (!noScrollExec) {
+      try {
       await chestScanFunc(
         page,
         count,
@@ -223,7 +233,17 @@ socket.on("run_cookie", async (payload) => {
         uuid,
         browser,
         closeBrowser
-      );
+      );} catch (err) {
+        console.log(err)
+        await chestScanFunc(page,
+          count,
+          "chest",
+          socket,
+          payload.accountId,
+          uuid,
+          browser,
+          closeBrowser)
+      }
     }
   }
 

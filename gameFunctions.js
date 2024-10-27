@@ -224,26 +224,8 @@ async function chestScanFunc(
       console.log(name + count);
 
       //await preventBadChests(name, count);
-
-      let res = await axios.post(`${process.env.API_URL}/db`, {
-        accountId: accId,
-        sessionId: sId,
-      });
-      let { uploadLink, downloadLink, chestId } = res.data;
-
-      axios
-        .put(uploadLink, chestBuffer, {
-          headers: {
-            "Content-Type": "image/png",
-          },
-        })
-        .then((response) => {
-          socket.emit("cheststatus", "UPLOADED", chestId);
-        })
-        .catch((e) => {
-          console.log(e);
-        });
-
+      await uploadChests(socket, chestBuffer);
+    
       const scroll = PNG.sync.read(fs.readFileSync("screenshots/scroll.png"));
       const scrollFinished = PNG.sync.read(
         fs.readFileSync("ideal_screenshots/scroll_finished.png")
@@ -525,34 +507,39 @@ async function openBanksPageFunc(page, emitStatus) {
   }
 }
 
-async function lastChestsFunc(page, name, count, lastChests) {
+async function lastChestsFunc(page, name, count, lastChests, socket) {
   try {
     let x = 0;
     if (lastChests) {
       x = x + 5;
     }
-    await page.screenshot({
+    let chestBuffer = await page.screenshot({
       path: `screenshots/${name}s/${name}${count}.png`,
       clip: { x: 382, y: 198 - x, width: 701, height: 80 },
     });
+    await uploadChests(socket, chestBuffer);
 
     count++;
-    await page.screenshot({
+    chestBuffer = await page.screenshot({
       path: `screenshots/${name}s/${name}${count}.png`,
       clip: { x: 382, y: 298 - x, width: 701, height: 80 },
     });
+    await uploadChests(socket, chestBuffer);
 
     count++;
-    await page.screenshot({
+    chestBuffer = await page.screenshot({
       path: `screenshots/${name}s/${name}${count}.png`,
       clip: { x: 382, y: 398 - x, width: 701, height: 80 },
     });
+    await uploadChests(socket, chestBuffer);
 
     count++;
-    await page.screenshot({
+    chestBuffer = await page.screenshot({
       path: `screenshots/${name}s/${name}${count}.png`,
       clip: { x: 382, y: 498 - x, width: 701, height: 80 },
     });
+    await uploadChests(socket, chestBuffer);
+    
     await page.mouse.click(1040, 630);
     await page.waitForTimeout(1000);
     await page.mouse.click(1040, 630);
@@ -568,32 +555,30 @@ async function lastChestsFunc(page, name, count, lastChests) {
   }
 }
 
-async function lastChestsUploadFunc(name, count, socket, accId, sId) {
+async function uploadChests(socket, chestBuffer) {
   try {
-    count--;
-    for (let n = 1; n < 5; n++) {
-      count++;
-      if (fs.existsSync(`screenshots/${name}s/${name}${count}.png`)) {
-        const chestBuffer = fs.readFileSync(
-          `screenshots/${name}s/${name}${count}.png`
-        );
-        let res = await axios.post(`${process.env.API_URL}/db`);
-        let { uploadLink, downloadLink, chestId } = res.data;
+    let res = await axios.post(`${process.env.API_URL}/db`, {
+      accountId: accId,
+      sessionId: sId,
+    });
+    let { uploadLink, downloadLink, chestId } = res.data;
 
-        await axios.put(uploadLink, chestBuffer, {
-          headers: {
-            "Content-Type": "image/png",
-          },
-        });
-
+    axios
+      .put(uploadLink, chestBuffer, {
+        headers: {
+          "Content-Type": "image/png",
+        },
+        timeout: 300000
+      })
+      .then((response) => {
         socket.emit("cheststatus", "UPLOADED", chestId);
-
-        //upload(chestBuffer, `${name + count}_${await chestid}.png`);
-      }
-    }
+      })
+      .catch((e) => {
+        console.log(e);
+      });
   } catch (err) {
     console.log(
-      "An error has occured during an execution of last chests function",
+      "An error has occured during an execution of upload chests function",
       err
     );
   }
