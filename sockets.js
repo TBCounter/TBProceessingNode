@@ -100,7 +100,7 @@ socket.on("run_cookie", async (payload) => {
     socket.emit("status", { sessionId: uuid, message });
   }
 
-  setInterval(()=> {
+  setInterval(() => {
     logMemoryUsage()
   }, 5000)
 
@@ -178,10 +178,13 @@ socket.on("run_cookie", async (payload) => {
     return;
   }
 
-  await secondProgressFunc(page).catch((e) => {
-    console.log(e);
-    closeBrowser(browser, uuid, "ERROR");
-  });
+  let exitCondition = false
+  do {
+    exitCondition = await secondProgressFunc(page).catch((e) => {
+      console.log(e);
+      closeBrowser(browser, uuid, "ERROR");
+    });
+  } while (!exitCondition)
 
   //preventLogoutFunc(page).catch(() => {
   //  closeBrowser(browser, uuid, "ERROR");
@@ -224,16 +227,17 @@ socket.on("run_cookie", async (payload) => {
     console.log(noScrollExec);
     if (!noScrollExec) {
       try {
-      await chestScanFunc(
-        page,
-        count,
-        "chest",
-        socket,
-        payload.accountId,
-        uuid,
-        browser,
-        closeBrowser
-      );} catch (err) {
+        await chestScanFunc(
+          page,
+          count,
+          "chest",
+          socket,
+          payload.accountId,
+          uuid,
+          browser,
+          closeBrowser
+        );
+      } catch (err) {
         console.log(err)
         await chestScanFunc(page,
           count,

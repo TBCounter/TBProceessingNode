@@ -180,7 +180,9 @@ async function secondProgressFunc(page) {
   );
 
   if (diffPixels > 5000) {
-    await secondProgressFunc(page);
+    return false
+  } else {
+    return true
   }
 
   console.log("Second progress function executed successfuly");
@@ -211,7 +213,7 @@ async function chestScanFunc(
 
 
       count++;
-      
+
       await page.screenshot({
         path: "screenshots/scroll.png",
         clip: { x: 1090, y: 540, width: 25, height: 60 },
@@ -225,7 +227,7 @@ async function chestScanFunc(
 
       //await preventBadChests(name, count);
       await uploadChests(socket, chestBuffer);
-    
+
       const scroll = PNG.sync.read(fs.readFileSync("screenshots/scroll.png"));
       const scrollFinished = PNG.sync.read(
         fs.readFileSync("ideal_screenshots/scroll_finished.png")
@@ -539,7 +541,7 @@ async function lastChestsFunc(page, name, count, lastChests, socket) {
       clip: { x: 382, y: 498 - x, width: 701, height: 80 },
     });
     await uploadChests(socket, chestBuffer);
-    
+
     await page.mouse.click(1040, 630);
     await page.waitForTimeout(1000);
     await page.mouse.click(1040, 630);
