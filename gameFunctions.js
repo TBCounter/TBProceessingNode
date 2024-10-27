@@ -549,6 +549,15 @@ async function lastChestsFunc(page, name, count, lastChests, socket) {
     await page.mouse.click(1040, 630);
     await page.waitForTimeout(1000);
     await page.mouse.click(1040, 630);
+
+    await page.waitForTimeout(1000);
+    await page.mouse.click(400, 630);
+    await page.waitForTimeout(1000);
+    await page.mouse.click(400, 630);
+    await page.waitForTimeout(1000);
+    await page.mouse.click(400, 630);
+    await page.waitForTimeout(1000);
+    await page.mouse.click(400, 630);
   } catch (err) {
     console.log(
       "An error has occured during an execution of last chests function",
