@@ -61,7 +61,7 @@ async function preventLogoutFunc(page) {
 
   await page.screenshot({
     path: "screenshots/preventlogout.png",
-    clip: { x: 544, y: 208, width: 180, height: 180 },
+    clip: { x: 584, y: 208, width: 80, height: 130 },
   });
 
   const preventlogout = PNG.sync.read(
